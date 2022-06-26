@@ -5,8 +5,9 @@
 
 const Category = require('../models/CategoryModel');
 const ObjectID = require('mongoose').Types.ObjectId;
-
 const { isValidObjectId } = require('mongoose');
+const Joi = require("joi");
+const cloudinary = require("../middleware/cloudinary");
 
 //Add category on the database
 module.exports.addCategory = async (req, res) => {
@@ -14,30 +15,41 @@ module.exports.addCategory = async (req, res) => {
     const { name, image } = req.body;
 
     try {
-        /*const file = req.file;
-        if (!file) return res.status(400).send('No image in the request');
-        
-        const fileName = file.filename;
-        const basePath = `${req.protocol}://${req.get('host')}/public/uploads/categories/`;
-        */
+
+        const schema = Joi.object({
+            name: Joi.string().min(3).max(20).required(),
+            image: Joi.string().dataUri(),
+        });
+
+        const { error } = schema.validate(req.body);
+
+        if (error) return res.status(400).send(error.details[0].message);
+
         const existCategory = await Category.findOne({ name });
         if (existCategory) return res.status(400).json({ errorMessage: "Category already exist!", });
 
-        const newCategory = await Category.create({
-            name: req.body.name,
-            image, //image: `${basePath}${fileName}`, // "http://localhost:3000/public/uploads/categories/image-123456"
+        const pathName = req.file.path;
+
+        const uploadedResponse = await cloudinary.uploader.upload(pathName, {
+            upload_preset: "dev_categories",
         });
 
-        if (!newCategory) return res.status(500).send('The category cannot be created');
+        if (uploadedResponse) {
+            const newCategory = new Category({
+                name,
+                image: uploadedResponse.secure_url,
+                cloudinary_id: uploadedResponse.public_id,
+            });
 
-        //res.status(200).send('The Category ' + newCategory.name +  ' added successfully');
-        res.status(200).json(newCategory);
+            if (!newCategory) return res.status(500).send('The category cannot be created');
+
+            await newCategory.save();
+            res.status(200).json({ newCategory });
+        }
+    } catch (err) {
+        res.status(500).json({ message: err });
+        console.log(err);
     }
-    catch (err) {
-        res.status(500).json({
-            errorMessage: " Failed, please try again!",
-        });
-    };
 };
 
 //Get categories on the database
@@ -49,7 +61,8 @@ module.exports.getCategories = async (req, res) => {
             res.status(500).json({ success: false })
         res.status(200).send(categoryList);
     } catch (err) {
-        res.status(500).json({ message: err })
+        res.status(500).json({ message: err });
+        console.log(err);
     }
 };
 
@@ -65,60 +78,87 @@ module.exports.getCategory = async (req, res) => {
             return res.status(404).json({ success: false, message: "Category not found!" })
         res.status(200).json(category);
     } catch (err) {
-        res.status(500).json({ message: err })
+        res.status(500).json({ message: err });
+        console.log(err);
     }
 };
 
 //Modify category on the database
 module.exports.modifyCategory = async (req, res) => {
+
     const idCategory = req.params.id;
 
     try {
+
+        const schema = Joi.object({
+            name: Joi.string().min(3).max(20),
+            image: Joi.string().dataUri(),
+        });
+
+        const { error } = schema.validate(req.body);
+
+        if (error) return res.status(400).send(error.details[0].message);
+
         if (!isValidObjectId(idCategory))
             return res.status(500).json({ success: false, message: 'Invalid ID: ' + idCategory })
 
+        let category = await Category.findById(req.params.id);
 
-        const file = req.file;
-        let imagepath;
+        let imagepath, cld_id, uploadedResponse;
 
-        if (file) {
-            const fileName = file.filename;
-            const basePath = `${req.protocol}://${req.get('host')}/public/uploads/categories/`;
-            imagepath = `${basePath}${fileName}`;
-        } else {
-            const category = await Category.findById(idCategory);
+        if ((req?.file === "") || (req?.file === undefined)) {
+
             imagepath = category.image;
+            cld_id = category.cloudinary_id;
+
+        } else {
+            await cloudinary.uploader.destroy(category.cloudinary_id);
+
+            uploadedResponse = await cloudinary.uploader.upload(req.file.path, {
+                upload_preset: "dev_categories",
+            });
+
+            imagepath = uploadedResponse.secure_url;
+            cld_id = uploadedResponse.public_id;
         }
 
+        const data = {
+            name: req.body.name || category.name,
+            image: imagepath,
+            cloudinary_id: cld_id,
+        }
+
+        if (!data) return res.status(500).send('The category cannot be updated!');
+
         const updatedCategory = await Category.findByIdAndUpdate(
-            idCategory,
-            {
-                name: req.body.name,
-                image: imagepath, // "http://localhost:8000/public/upload/image-123456"
-            },
-            { new: true }
+            idCategory, data, { new: true }
         );
 
-        if (!updatedCategory) return res.status(500).send('The category cannot be updated!');
-
-        res.status(200).json(updatedCategory);
+        const message = "Category updated!";
+        res.status(200).json(message);
 
     } catch (err) {
-        res.status(500).json({ message: err })
+        res.status(500).json({ message: err });
+        console.log(err);
     }
 };
 
 //Delete category on the database
 module.exports.deleteCategory = async (req, res) => {
-    if (!isValidObjectId(req.params.id))
-        res.status(500).json({ message: 'Invalid ID: ' + req.params.id })
-    Category.findByIdAndRemove(req.params.id).then(category => {
+    try {
+        if (!isValidObjectId(req.params.id))
+            res.status(500).json({ message: 'Invalid ID: ' + req.params.id })
+
+        let category = await Category.findById(req.params.id);
         if (category) {
-            return res.status(200).json({ success: true, message: 'The category is deleted!' })
+            await cloudinary.uploader.destroy(category.cloudinary_id);
+            await category.remove();
+            return res.status(200).json({ success: true, message: 'Category deleted!' })
         } else {
             return res.status(404).json({ success: false, message: "Category not found!" })
         }
-    }).catch(err => {
-        return res.status(500).json({ success: false, error: err })
-    })
+    } catch (err) {
+        res.status(500).json({ message: err });
+        console.log(err);
+    }
 };

@@ -5,15 +5,13 @@
 
 const router = require('express').Router();
 const carouselController = require("../controllers/CarouselController");
-const { verifyTokenAndAdmin, verifyTokenAndAuthorized } = require("../middleware/AuthMiddleware");
-const { uploadOptionsCar } = require('../middleware/Multer');
+const upload = require('../middleware/Multer');
+const { verifyTokenAndAuthorizedAdmin, verifyTokenAndAuthorized } = require("../middleware/AuthMiddleware");
 
 //Routes
-router.post('/', uploadOptionsCar.single('image'), carouselController.addCarousel);
-router.put('/:id', uploadOptionsCar.single('image'), carouselController.modifyCarousel);
-//router.post('/', verifyTokenAndAdmin, productController.addProduct);
-//router.put('/:id', verifyTokenAndAdmin, productController.modifyProduct);
 router.get('/', carouselController.getCarousel);
-router.delete('/:id',  carouselController.deleteCarousel);
+router.post('/', upload.single('image'), verifyTokenAndAuthorizedAdmin, carouselController.addCarousel);
+router.put('/:id', upload.single('image'), verifyTokenAndAuthorizedAdmin, carouselController.modifyCarousel);
+router.delete('/:id', verifyTokenAndAuthorizedAdmin, carouselController.deleteCarousel);
 
 module.exports = router;

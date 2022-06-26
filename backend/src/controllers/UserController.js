@@ -6,121 +6,139 @@
 const User = require('../models/UserModel')
 const CryptoJS = require('crypto-js');
 const { isValidObjectId } = require('mongoose');
-const jwt = require("jsonwebtoken");
+const cloudinary = require("../middleware/cloudinary");
+const Joi = require("joi");
+const { image } = require('../middleware/cloudinary');
 
 //Get users on the database
 module.exports.getUsers = async (req, res) => {
     const query = req.query.new;
-    try{
-        const users = query 
-            ? await User.find().select('-password').sort({_id:-1}).limit(5) 
+    try {
+        const users = query
+            ? await User.find().select('-password').sort({ _id: -1 }).limit(5)
             : await User.find().select('-password');
         //const users = await User.find().select('-password');
-        
-        if(!users) {
-            res.status(500).json({success: false})
-        } 
+
+        if (!users) {
+            res.status(500).json({ success: false })
+        }
         res.status(200).json(users);
-    }catch(err){
-        res.status(500).json({message: err})
+    } catch (err) {
+        res.status(500).json({ message: err })
     }
 };
 
 //Get user on the database
 module.exports.getUser = async (req, res) => {
-    if(!isValidObjectId(req.params.id))
-        res.status(500).json({message: 'Invalid ID: ' + req.params.id})
-    try{
+    if (!isValidObjectId(req.params.id))
+        res.status(500).json({ message: 'Invalid ID: ' + req.params.id })
+    try {
         const user = await User.findById(req.params.id).select('-password');
 
-        if(!user)
-            res.status(500).json({message: 'User not found!'})
+        if (!user)
+            res.status(500).json({ message: 'User not found!' })
         res.status(200).json(user);
-    }catch(err){
-        res.status(500).json({message: err})
+    } catch (err) {
+        res.status(500).json({ message: err })
     }
 };
-  
+
 //Modify user on the database
 module.exports.modifyUser = async (req, res) => {
+
     const idUser = req.params.id;
 
-    if(!isValidObjectId(idUser)) res.status(500).json({message: 'Invalid ID: ' + idUser})
+    const patt = '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*:."?]).{6,}$';
 
-    if(req.body.password){
-        req.body.password = CryptoJS.AES.encrypt(
-            req.body.password, 
-            process.env.SECRET_PASSWORD
-        ).toString();
-    }
-    
-    try{
-        let imagepath;
-        const file = req.file;
-        
-        if (file) {
-            const fileName = file.filename;
-            const basePath = `${req.protocol}://${req.get('host')}/public/uploads/users/`;
-            imagepath = `${basePath}${fileName}`;
-        } else {
-            const user = await User.findById(idUser);
+    try {
+
+        const schema = Joi.object({
+            firstname: Joi.string().min(3).max(20),
+            lastname: Joi.string().min(3).max(20),
+            email: Joi.string().min(3).max(50).email(),
+            password: Joi.string().min(8).max(1024)
+                .pattern(new RegExp(patt))
+                .label("Password")
+                .messages({
+                    "string.min": "Must have at least 8 characters",
+                    "object.regex": "Must have at least 8 characters",
+                    "string.pattern.base": "The password must have a minimum of 8 characters which contains at least one number, one symbol, uppercase and lowercase letters."
+                }),
+            gender: Joi.string(),
+            image: Joi.string().dataUri(),
+        });
+
+        const { error } = schema.validate(req.body);
+
+        if (error) return res.status(400).send(error.details[0].message);
+
+        if (!isValidObjectId(idUser)) res.status(500).json({ message: 'Invalid ID: ' + idUser })
+
+        let user = await User.findById(req.params.id);
+
+        let imagepath, cld_id, uploadedResponse;
+
+        if ((req?.file === "") || (req?.file === undefined)) {
+
             imagepath = user.image;
+            cld_id = user.cloudinary_id;
+
+        } else {
+            await cloudinary.uploader.destroy(user.cloudinary_id);
+
+            uploadedResponse = await cloudinary.uploader.upload(req.file.path, {
+                upload_preset: "dev_users",
+            });
+
+            imagepath = uploadedResponse.secure_url;
+            cld_id = uploadedResponse.public_id;
         }
 
+        const data = {
+            firstname: req.body.firstname || user.firstname,
+            lastname: req.body.lastname || user.lastname,
+            email: req.body.email || user.email,
+            password: CryptoJS.AES.encrypt(
+                req.body.password,
+                process.env.SECRET_CRYPTOJS).toString(),
+            gender: req.body.gender || user.gender,
+            image: imagepath,
+            cloudinary_id: cld_id,
+        }
+
+        if (!data) return res.status(500).send('The user cannot be updated!');
+
         const updatedUser = await User.findByIdAndUpdate(
-            idUser,
-            {
-                firstname: req.body.firstname,
-                lastname: req.body.lastname,
-                email: req.body.email,
-                password: req.body.password,
-                gender: req.body.gender,
-                image: imagepath, // "http://localhost:8000/public/upload/users/image-123456"
-            },
-            { new: true }
+            idUser, data, { new: true }
         );
 
-        if (!updatedUser) return res.status(500).send('The user cannot be updated!');
-        
-        res.status(200).json(updatedUser);
-    /*if(!isValidObjectId(req.params.id))
-        res.status(500).json({message: 'Invalid ID: ' + req.params.id})
+        const message = "User updated!";
+        res.status(200).json(message);
 
-    if(req.body.password){
-        req.body.password = CryptoJS.AES.encrypt(
-            req.body.password, 
-            process.env.SECRET_PASSWORD
-        ).toString();
-    }
-
-    try{
-        const user = await User.findByIdAndUpdate(
-            req.params.id, 
-            {
-                $set : req.body 
-            }, 
-            { new: true }
-        );
-        res.status(200).json(user);*/
-    }catch(err){
-        res.status(500).json({message: err});
+    } catch (err) {
+        res.status(500).json({ message: err });
+        console.log(err);
     }
 };
 
 //Delete user on the database
 module.exports.deleteUser = async (req, res) => {
-    if(!isValidObjectId(req.params.id))
-        res.status(500).json({message: 'Invalid ID: ' + req.params.id})
+    try {
+        if (!isValidObjectId(req.params.id))
+            res.status(500).json({ message: 'Invalid ID: ' + req.params.id })
 
-    User.findByIdAndDelete(req.params.id).then(user =>{
-        if(user) {
-            return res.status(200).json({success: true, message: 'the user is deleted!'})
+        let user = await User.findById(req.params.id);
+        if (user) {
+            await cloudinary.uploader.destroy(user.cloudinary_id);
+            await user.remove();
+            return res.status(200).json({ success: true, message: 'User deleted!' })
         } else {
-            return res.status(404).json({success: false , message: "user not found!"})
+            return res.status(404).json({ success: false, message: "User not found!" })
         }
-    }).catch(err=>{
-       return res.status(500).json({success: false, error: err}) 
-    })
+    } catch (err) {
+        res.status(500).json({ message: err });
+        console.log(err);
+    }
 };
 
 
@@ -128,24 +146,24 @@ module.exports.deleteUser = async (req, res) => {
 module.exports.getStatUser = async (req, res) => {
     const date = new Date();
     const lastYear = new Date(date.setFullYear(date.getFullYear() - 1));
-    
+
     try {
-      const data = await User.aggregate([
-        { $match: { createdAt: { $gte: lastYear } } },
-        {
-          $project: {
-            month: { $month: "$createdAt" },
-          },
-        },
-        {
-          $group: {
-            _id: "$month",  // Get the number of month
-            total: { $sum: 1 },  // return the total item on the month
-          },
-        },
-      ]);
-      res.status(200).json(data)
+        const data = await User.aggregate([
+            { $match: { createdAt: { $gte: lastYear } } },
+            {
+                $project: {
+                    month: { $month: "$createdAt" },
+                },
+            },
+            {
+                $group: {
+                    _id: "$month",  // Get the number of month
+                    total: { $sum: 1 },  // return the total item on the month
+                },
+            },
+        ]);
+        res.status(200).json(data)
     } catch (err) {
-      res.status(500).json({message: err});
+        res.status(500).json({ message: err });
     }
 };

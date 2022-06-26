@@ -11,36 +11,47 @@ const ProductSchema = new mongoose.Schema(
         name: {
             type: String,
             required: true,
+            minlength: 3,
+            maxlength: 20,
             unique: true
         },
         description: {
             type: String,
+            minlength: 3,
+            maxlength: 200,
             required: true
         },
         quantity: {
             type: Number,
-            default: 0
+            minlength: 1,
+            maxlength: 1000,
+            required: true
         },
-        price: { 
+        price: {
             type: Number,
+            minlength: 1,
+            maxlength: 1000,
             required: true
         },
         image: {
             type: String,
             required: true
         },
+        cloudinary_id: {
+            type: String,
+        },
         category: {
             type: ObjectId,
             ref: 'Category',
             required: true
         },
-        size: { 
+        size: {
             type: Array
         },
-        color: { 
+        color: {
             type: Array
         },
-        inStock: { 
+        inStock: {
             type: Boolean,
             default: true
         },

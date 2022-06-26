@@ -9,11 +9,11 @@ const initialState = {
     createStatus: null,
 };
 
-export const productsFetch = createAsyncThunk(
-    "products/productsFetch",
+export const categoriesFetch = createAsyncThunk(
+    "categories/categoriesFetch",
     async () => {
         try {
-            const response = await axios.get(`${url}/products`);
+            const response = await axios.get(`${url}/categories`);
             return response.data;
         } catch (error) {
             console.log(error);
@@ -21,12 +21,12 @@ export const productsFetch = createAsyncThunk(
     }
 );
 
-export const productsCreate = createAsyncThunk(
-    "products/productsCreate",
+export const categoriesCreate = createAsyncThunk(
+    "categories/categoriesCreate",
     async (values) => {
         try {
             const response = await axios.post(
-                `${url}/products`,
+                `${url}/categories`,
                 values,
                 setHeaders()
             );
@@ -39,33 +39,33 @@ export const productsCreate = createAsyncThunk(
     }
 );
 
-const productsSlice = createSlice({
-    name: "products",
+const categoriesSlice = createSlice({
+    name: "categories",
     initialState,
     reducers: {},
     extraReducers: {
-        [productsFetch.pending]: (state, action) => {
+        [categoriesFetch.pending]: (state, action) => {
             state.status = "pending";
         },
-        [productsFetch.fulfilled]: (state, action) => {
+        [categoriesFetch.fulfilled]: (state, action) => {
             state.items = action.payload;
             state.status = "success";
         },
-        [productsFetch.rejected]: (state, action) => {
+        [categoriesFetch.rejected]: (state, action) => {
             state.status = "rejected";
         },
-        [productsCreate.pending]: (state, action) => {
+        [categoriesCreate.pending]: (state, action) => {
             state.createStatus = "pending";
         },
-        [productsCreate.fulfilled]: (state, action) => {
+        [categoriesCreate.fulfilled]: (state, action) => {
             state.items.push(action.payload);
             state.createStatus = "success";
-            toast.success("Product Created!");
+            toast.success("Category Created!");
         },
-        [productsCreate.rejected]: (state, action) => {
+        [categoriesCreate.rejected]: (state, action) => {
             state.createStatus = "rejected";
         },
     },
 });
 
-export default productsSlice.reducer;
+export default categoriesSlice.reducer;

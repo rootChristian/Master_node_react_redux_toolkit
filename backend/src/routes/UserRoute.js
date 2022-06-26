@@ -5,21 +5,17 @@
 
 const router = require('express').Router();
 const userController = require("../controllers/UserController");
-const { uploadOptionsUser } = require('../middleware/Multer');
-const { verifyTokenAndAdmin, verifyTokenAndAuthorized } = require("../middleware/AuthMiddleware");
+const authController = require("../controllers/AuthController");
+const upload = require('../middleware/Multer');
+const { verifyTokenAndAuthorizedAdmin, verifyTokenAndAuthorized } = require("../middleware/AuthMiddleware");
 
 //Routes
-router.get('/stats', userController.getStatUser);
-
-router.put('/:id', uploadOptionsUser.single('image'), userController.modifyUser);
-router.get('/:id', userController.getUser);
-router.get('/', userController.getUsers);
-router.delete('/:id', userController.deleteUser);
-/*router.get('/stats', verifyTokenAndAdmin, userController.getStatUser);
-
-router.put('/:id', uploadOptionsUser.single('image'), verifyTokenAndAuthorized, userController.modifyUser);
-router.get('/:id', verifyTokenAndAdmin, userController.getUser);
-router.get('/', verifyTokenAndAdmin, userController.getUsers);
+router.get('/:id', verifyTokenAndAuthorized, userController.getUser);
+router.get('/', verifyTokenAndAuthorizedAdmin, userController.getUsers);
+router.post('/', upload.single('image'), authController.signUp);
+router.put('/:id', upload.single('image'), verifyTokenAndAuthorized, userController.modifyUser);
 router.delete('/:id', verifyTokenAndAuthorized, userController.deleteUser);
-*/
+
+router.get('/stats', verifyTokenAndAuthorizedAdmin, userController.getStatUser);
+
 module.exports = router;

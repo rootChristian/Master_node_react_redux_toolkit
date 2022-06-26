@@ -5,15 +5,15 @@
 
 const router = require('express').Router();
 const orderController = require("../controllers/OrderController");
-const { verifyTokenAndAdmin, verifyTokenAndAuthorized, verifyToken } = require("../middleware/AuthMiddleware");
+const { verifyTokenAndAuthorizedAdmin, verifyTokenAndAuthorized } = require("../middleware/AuthMiddleware");
 
 //Routes
-router.get('/stats', verifyTokenAndAdmin, orderController.getStatOrder);
+router.get('/stats', verifyTokenAndAuthorizedAdmin, orderController.getStatOrder);
 
-router.post('/', verifyToken, orderController.createOrder);
+router.post('/', verifyTokenAndAuthorized, orderController.createOrder);
 router.put('/:userId', verifyTokenAndAuthorized, orderController.modifyOrder);
 router.get('/:userId', verifyTokenAndAuthorized, orderController.getOrder);
-router.get('/', verifyTokenAndAdmin, orderController.getOrders);
-router.delete('/:userId', verifyTokenAndAdmin, orderController.deleteOrder);
+router.get('/', verifyTokenAndAuthorizedAdmin, orderController.getOrders);
+router.delete('/:userId', verifyTokenAndAuthorized, orderController.deleteOrder);
 
-module.exports = router;
+module.exports = router; 

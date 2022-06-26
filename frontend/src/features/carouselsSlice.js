@@ -9,11 +9,11 @@ const initialState = {
     createStatus: null,
 };
 
-export const productsFetch = createAsyncThunk(
-    "products/productsFetch",
+export const carouselsFetch = createAsyncThunk(
+    "carousels/carouselsFetch",
     async () => {
         try {
-            const response = await axios.get(`${url}/products`);
+            const response = await axios.get(`${url}/carousels`);
             return response.data;
         } catch (error) {
             console.log(error);
@@ -21,12 +21,12 @@ export const productsFetch = createAsyncThunk(
     }
 );
 
-export const productsCreate = createAsyncThunk(
-    "products/productsCreate",
+export const carouselsCreate = createAsyncThunk(
+    "carousels/carouselsCreate",
     async (values) => {
         try {
             const response = await axios.post(
-                `${url}/products`,
+                `${url}/carousels`,
                 values,
                 setHeaders()
             );
@@ -39,33 +39,33 @@ export const productsCreate = createAsyncThunk(
     }
 );
 
-const productsSlice = createSlice({
-    name: "products",
+const carouselsSlice = createSlice({
+    name: "carousels",
     initialState,
     reducers: {},
     extraReducers: {
-        [productsFetch.pending]: (state, action) => {
+        [carouselsFetch.pending]: (state, action) => {
             state.status = "pending";
         },
-        [productsFetch.fulfilled]: (state, action) => {
+        [carouselsFetch.fulfilled]: (state, action) => {
             state.items = action.payload;
             state.status = "success";
         },
-        [productsFetch.rejected]: (state, action) => {
+        [carouselsFetch.rejected]: (state, action) => {
             state.status = "rejected";
         },
-        [productsCreate.pending]: (state, action) => {
+        [carouselsCreate.pending]: (state, action) => {
             state.createStatus = "pending";
         },
-        [productsCreate.fulfilled]: (state, action) => {
+        [carouselsCreate.fulfilled]: (state, action) => {
             state.items.push(action.payload);
             state.createStatus = "success";
             toast.success("Product Created!");
         },
-        [productsCreate.rejected]: (state, action) => {
+        [carouselsCreate.rejected]: (state, action) => {
             state.createStatus = "rejected";
         },
     },
 });
 
-export default productsSlice.reducer;
+export default carouselsSlice.reducer;

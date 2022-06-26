@@ -11,8 +11,8 @@ const config = process.env;
 module.exports.verifyToken = async (req, res, next) => {
     const token = req.body.token || req.query.token || req.headers["x-access-token"];
 
-    if (!token) 
-        return res.status(403).send("Token is required for authentication!");  
+    if (!token)
+        return res.status(403).send("Access denied. Not authenticated...");
     try {
         const decodeUser = await jwt.verify(token, config.SECRET_TOKEN);
         req.user = decodeUser;
@@ -23,21 +23,21 @@ module.exports.verifyToken = async (req, res, next) => {
 };
 
 // Authorized user or administrator
-module.exports.verifyTokenAndAuthorized = async(req, res, next) => {
+module.exports.verifyTokenAndAuthorized = async (req, res, next) => {
     await this.verifyToken(req, res, () => {
-        if(req.user.id === req.params.id || req.user.role === "ROOT" || req.user.role === "ADMIN")
+        if (req.user._id === req.params.id || req.user.isAdmin)
             return next();
-        else    
-            return res.status(403).json("user  Unauthorized!");
+        else
+            return res.status(403).json("Access denied. Not authorized...");
     })
 };
 
 // Authorized administrator
-module.exports.verifyTokenAndAdmin = async(req, res, next) => {
+module.exports.verifyTokenAndAuthorizedAdmin = async (req, res, next) => {
     await this.verifyToken(req, res, () => {
-        if(req.user.role === "ROOT" || req.user.role === "ADMIN")
+        if (req.user.isAdmin)
             return next();
-        else    
-            return res.status(403).json("admin Unauthorized!");
+        else
+            return res.status(403).json("Access denied. Not authorized...");
     })
 };

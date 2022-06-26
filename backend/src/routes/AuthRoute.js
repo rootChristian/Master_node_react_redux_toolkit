@@ -5,15 +5,12 @@
 
 const router = require('express').Router();
 const authController = require("../controllers/AuthController");
-const { uploadOptionsUser } = require('../middleware/Multer');
-const { verifyTokenAndAdmin, verifyTokenAndAuthorized } = require("../middleware/AuthMiddleware");
+const upload = require('../middleware/Multer');
+const { verifyTokenAndAuthorizedAdmin, verifyTokenAndAuthorized } = require("../middleware/AuthMiddleware");
 
 //Routes
-router.delete('/deleteAll', authController.deleteProductsCategories);
-
-router.post('/register', uploadOptionsUser.single('image'), authController.signUp);
+router.post('/register', upload.single('image'), verifyTokenAndAuthorizedAdmin, authController.signUp);
 router.post('/login', authController.signIn);
 router.get('/logout', authController.Logout);
 
-
-module.exports = router;
+module.exports = router; 

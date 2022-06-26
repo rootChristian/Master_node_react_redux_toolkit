@@ -6,20 +6,29 @@
 const Product = require('../models/ProductModel');
 const Category = require('../models/CategoryModel')
 const ObjectID = require('mongoose').Types.ObjectId;
-
 const { isValidObjectId } = require('mongoose');
+const Joi = require("joi");
+const cloudinary = require("../middleware/cloudinary");
 
 //Add product on the database
 module.exports.addProduct = async (req, res) => {
     const { name, description, quantity, price, image, category, size, color, inStock } = req.body;
 
     try {
-        /*const file = req.file;
-        if (!file) return res.status(400).send('No image in the request');
+        const schema = Joi.object({
+            name: Joi.string().min(3).max(20).required(),
+            description: Joi.string().min(3).max(200).required(),
+            quantity: Joi.number().min(1).max(1000).required(),
+            price: Joi.number().min(1).max(1000).required(),
+            image: Joi.string().dataUri(),
+            category: Joi.string().required(),
+            size: Joi.string(),
+        });
 
-        const fileName = file.filename;
-        const basePath = `${req.protocol}://${req.get('host')}/public/uploads/products/`;
-        */
+        const { error } = schema.validate(req.body);
+
+        if (error) return res.status(400).send(error.details[0].message);
+
         const existProduct = await Product.findOne({ name });
         if (existProduct) return res.status(400).json({ errorMessage: "Product already exist!", });
 
@@ -28,50 +37,53 @@ module.exports.addProduct = async (req, res) => {
         const existCategory = await Category.findById(category)
         if (!existCategory) return res.status(400).json({ errorMessage: "Category not found!", });
 
-        const newProduct = await Product.create({
-            name: req.body.name,
-            description: req.body.description,
-            quantity: req.body.quantity,
-            price: req.body.price,
-            image: req.body.image, //image: `${basePath}${fileName}`, // "http://localhost:3000/public/upload/products/image-123456"
-            category: req.body.category,
-            size: req.body.size,
-            color: req.body.color,
-            inStock: req.body.inStock,
+        const pathName = req.file.path;
+
+        const uploadedResponse = await cloudinary.uploader.upload(pathName, {
+            upload_preset: "dev_products",
         });
 
-        if (!newProduct) {
-            const message = "The product cannot be created!";
-            res.status(400).send({ message });
-            return;
-        }
-        const message = "The produuct " + newProduct.name + " added successfully in category " + existCategory.name + "!";
-        res.status(200).json({ newProduct, message });
+        if (uploadedResponse) {
+            const newProduct = new Product({
+                name,
+                description,
+                quantity,
+                price,
+                image: uploadedResponse.secure_url,
+                cloudinary_id: uploadedResponse.public_id,
+                category,
+                size,
+                color,
+                inStock,
+            });
 
+            if (!newProduct) return res.status(500).send('The product cannot be created!');
+
+            await newProduct.save();
+            res.status(200).json({ newProduct });
+        }
     } catch (err) {
-        res.status(500).json({ message: err })
+        res.status(500).json({ message: err });
+        console.log(err);
     }
 };
 
 //Get products on the database
 module.exports.getProducts = async (req, res) => {
+
     const queryNew = req.query.limit;
-    //const queryCategory = req.query.category;
+
     try {
         let products;
 
-        if (queryNew)
-            products = await Product.find().sort({ createdAt: -1 }).limit(6);
-        /*else if (queryCategory)
-            products = await Product.find({
-                categories: { $in: [queryCategory] }
-            });*/
-        else
-            products = await Product.find();
+        if (queryNew) products = await Product.find().sort({ createdAt: -1 }).limit(6);
+        else products = await Product.find();
 
         res.status(200).json(products);
+
     } catch (err) {
-        res.status(500).json({ message: err })
+        res.status(500).json({ message: err });
+        console.log(err);
     }
 };
 
@@ -86,7 +98,8 @@ module.exports.getProduct = async (req, res) => {
             return res.status(404).json({ success: false, message: "Product not found!" })
         res.status(200).json(product);
     } catch (err) {
-        res.status(500).json({ message: err })
+        res.status(500).json({ message: err });
+        console.log(err);
     }
 };
 
@@ -105,65 +118,108 @@ module.exports.productByCategory = async (req, res) => {
         if (byCategory) res.status(200).json(byCategory);
 
     } catch (err) {
-        return res.status(403).json({ message: err });
+        res.status(500).json({ message: err });
+        console.log(err);
     }
 };
 
-//Modify products on the database
+//Modify product on the database
 module.exports.modifyProduct = async (req, res) => {
+
     const idProduct = req.params.id;
 
-    if (!isValidObjectId(idProduct))
-        return res.status(500).json({ success: false, message: 'Invalid ID: ' + idProduct })
-
     try {
-        let imagepath;
-        const file = req.file;
 
-        if (file) {
-            const fileName = file.filename;
-            const basePath = `${req.protocol}://${req.get('host')}/public/uploads/products/`;
-            imagepath = `${basePath}${fileName}`;
-        } else {
-            const product = await Product.findById(idProduct);
+        const schema = Joi.object({
+            name: Joi.string().min(3).max(20),
+            description: Joi.string().min(3).max(200),
+            quantity: Joi.number().min(1).max(1000),
+            price: Joi.number().min(1).max(1000),
+            image: Joi.string().dataUri(),
+            category: Joi.string(),
+            size: Joi.string(),
+        });
+
+        const { error } = schema.validate(req.body);
+
+        if (error) return res.status(400).send(error.details[0].message);
+
+        if (!isValidObjectId(idProduct)) res.status(500).json({ success: false, message: 'Invalid ID: ' + idProduct })
+
+        let product = await Product.findById(req.params.id);
+
+        let imagepath, cld_id, uploadedResponse;
+
+        if ((req?.file === "") || (req?.file === undefined)) {
+
             imagepath = product.image;
+            cld_id = product.cloudinary_id;
+
+        } else {
+            await cloudinary.uploader.destroy(product.cloudinary_id);
+
+            const uploadedResponse = await cloudinary.uploader.upload(req.file.path, {
+                upload_preset: "dev_products",
+            });
+
+            imagepath = uploadedResponse.secure_url;
+            cld_id = uploadedResponse.public_id;
         }
 
+        let getCat;
+        if (req.body.category) {
+            let category = await Category.findById(req.body.category);
+
+            if (category)
+                getCat = req.body.category;
+            else
+                return res.status(404).json({ success: false, message: "Category not found!" })
+        }
+
+        const data = {
+            name: req.body.name || product.name,
+            description: req.body.description || product.description,
+            quantity: req.body.quantity || product.quantity,
+            price: req.body.price || product.price,
+            image: imagepath,
+            cloudinary_id: cld_id,
+            category: getCat,
+            size: req.body.size || product.size,
+            color: req.body.color || product.color,
+            inStock: req.body.inStock || product.inStock,
+        }
+
+        if (!data) return res.status(500).send('The Product cannot be updated!');
+
         const updatedProduct = await Product.findByIdAndUpdate(
-            idProduct,
-            {
-                name: req.body.name,
-                description: req.body.description,
-                quantity: req.body.quantity,
-                price: req.body.price,
-                size: req.body.size,
-                image: imagepath, // "http://localhost:8000/public/upload/products/image-123456"
-                category: req.body.category,
-            },
-            { new: true }
+            idProduct, data, { new: true }
         );
 
-        if (!updatedProduct) return res.status(500).send('The product cannot be updated!');
-
-        res.status(200).json(updatedProduct);
+        const message = "Product updated!";
+        res.status(200).json(message);
 
     } catch (err) {
-        res.status(500).json({ message: err })
+        res.status(500).json({ message: err });
+        console.log(err);
     }
 };
 
 //Delete product on the database
 module.exports.deleteProduct = async (req, res) => {
-    if (!isValidObjectId(req.params.id))
-        return res.status(500).json({ success: false, message: 'Invalid ID: ' + req.params.id })
+    try {
+        if (!isValidObjectId(req.params.id))
+            res.status(500).json({ message: 'Invalid ID: ' + req.params.id })
 
-    Product.findByIdAndDelete(req.params.id).then(product => {
+        let product = await Product.findById(req.params.id);
         if (product) {
-            return res.status(200).json({ success: true, message: 'The product is deleted!' })
+            await cloudinary.uploader.destroy(product.cloudinary_id);
+            await product.remove();
+            return res.status(200).json({ success: true, message: 'Product deleted!' })
         } else {
             return res.status(404).json({ success: false, message: "Product not found!" })
         }
-    }).catch(err => {
-        return res.status(500).json({ success: false, error: err })
-    })
+    } catch (err) {
+        res.status(500).json({ message: err });
+        console.log(err);
+    }
 };

@@ -8,10 +8,10 @@ const OrderSchema = new mongoose.Schema(
         },
         products: [
             {
-                productId:{
+                productId: {
                     type: String
                 },
-                quantity:{
+                quantity: {
                     type: Number,
                     default: 1
                 },
@@ -21,13 +21,17 @@ const OrderSchema = new mongoose.Schema(
             type: Number,
             require: true
         },
-        address:{
+        address: {
             type: Object,
             required: true
         },
-        status:{
+        delivery_status: {
             type: String,
             default: "pending"
+        },
+        payment_status: {
+            type: String,
+            required: true
         },
     },
     {
