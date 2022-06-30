@@ -65,8 +65,8 @@ module.exports.signUp = async (req, res) => {
                 .pattern(new RegExp(patt))
                 .label("Password")
                 .messages({
-                    "string.min": "Must have at least 8 characters",
-                    "object.regex": "Must have at least 8 characters",
+                    "string.min": "Password must have at least 8 characters",
+                    "object.regex": "Password must have at least 8 characters",
                     "string.pattern.base": "The password must have a minimum of 8 characters which contains at least one number, one symbol, uppercase and lowercase letters."
                 })
                 .required(),
@@ -83,9 +83,10 @@ module.exports.signUp = async (req, res) => {
         let user = await User.findOne({ email: req.body.email });
         if (user) return res.status(400).send("User already exist...");
 
-        const pathName = req.file.path;
+        //when use postman to test
+        //const pathName = req.file.path;
 
-        const uploadedResponse = await cloudinary.uploader.upload(pathName, {
+        const uploadedResponse = await cloudinary.uploader.upload(req.body.image, {
             upload_preset: "dev_users",
         });
 

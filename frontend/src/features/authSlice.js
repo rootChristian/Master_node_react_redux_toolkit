@@ -4,30 +4,34 @@ import axios from "axios";
 import { url, setHeaders } from "./api";
 
 const initialState = {
-  token: localStorage.getItem("token"),
-  name: "",
-  email: "",
-  _id: "",
-  isAdmin: false,
-  registerStatus: "",
-  registerError: "",
-  loginStatus: "",
-  loginError: "",
-  userLoaded: false,
+  data: [],
+  user: {
+    firstname: "",
+    lastname: "",
+    email: "",
+    isAdmin: false,
+    image: null,
+  },
+  loading: false,
+  status: "",
+  error: ""
 };
 
+//Generates pending, fulfilled and rejected action types
 export const registerUser = createAsyncThunk(
-  "auth/registerUser",
+  "user/register",
   async (values, { rejectWithValue }) => {
     try {
-      const token = await axios.post(`${url}/register`, {
-        name: values.name,
+      const token = await axios.post(`${url}/users`, {
+        firstname: values.firstname,
+        lastname: values.lastname,
         email: values.email,
         password: values.password,
+        gender: values.gender,
+        image: values.image,
       });
 
-      localStorage.setItem("token", token.data);
-
+      localStorage.setItem("token", token.data.token);
       return token.data;
     } catch (error) {
       console.log(error.response.data);
@@ -36,156 +40,189 @@ export const registerUser = createAsyncThunk(
   }
 );
 
-export const loginUser = createAsyncThunk(
-  "auth/loginUser",
+export const signIn = createAsyncThunk(
+  "user/login",
   async (values, { rejectWithValue }) => {
     try {
-      const token = await axios.post(`${url}/login`, {
+      const token = await axios.post(`${url}/auth/login`, {
         email: values.email,
         password: values.password,
       });
 
-      localStorage.setItem("token", token.data);
+      localStorage.setItem("token", token.data.token);
       return token.data;
     } catch (error) {
-      console.log(error.response);
+      console.log(error.response.data);
       return rejectWithValue(error.response.data);
     }
   }
 );
 
-export const getUser = createAsyncThunk(
-  "auth/getUser",
-  async (id, { rejectWithValue }) => {
+export const signOut = createAsyncThunk(
+  "user/logout",
+  async ({ rejectWithValue }) => {
     try {
-      const token = await axios.get(`${url}/user/${id}`, setHeaders());
-
-      localStorage.setItem("token", token.data);
-
-      return token.data;
+      const response = await axios.post(`${url}/auth/logout`);
+      localStorage.removeItem("token");
+      return response.data;
     } catch (error) {
-      console.log(error.response);
+      console.log(error.response.data);
       return rejectWithValue(error.response.data);
     }
   }
 );
+
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers: {
-    loadUser(state, action) {
-      const token = state.token;
-
-      if (token) {
-        const user = jwtDecode(token);
-        return {
-          ...state,
-          token,
-          name: user.name,
-          email: user.email,
-          _id: user._id,
-          isAdmin: user.isAdmin,
-          userLoaded: true,
-        };
-      } else return { ...state, userLoaded: true };
-    },
-    logoutUser(state, action) {
-      localStorage.removeItem("token");
-
-      return {
-        ...state,
-        token: "",
-        name: "",
-        email: "",
-        _id: "",
-        isAdmin: false,
-        registerStatus: "",
-        registerError: "",
-        loginStatus: "",
-        loginError: "",
-      };
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(registerUser.pending, (state, action) => {
-      return { ...state, registerStatus: "pending" };
+    builder.addCase(registerUser.pending, state => {
+      state.loading = true;
+      state.status = "pending";
     });
     builder.addCase(registerUser.fulfilled, (state, action) => {
-      if (action.payload) {
-        const user = jwtDecode(action.payload);
-        return {
-          ...state,
-          token: action.payload,
-          name: user.name,
-          email: user.email,
-          _id: user._id,
-          isAdmin: user.isAdmin,
-          registerStatus: "success",
-        };
-      } else return state;
+      state.loading = false;
+      state.data = action.payload;
+      state.status = "success";
+
+      const userToken = jwtDecode(state.data.token);
+      state.user.firstname = userToken.firstname;
+      state.user.lastname = userToken.lastname;
+      state.user.email = userToken.email;
+      state.user.isAdmin = userToken.isAdmin;
+      state.user.image = userToken.image;
     });
     builder.addCase(registerUser.rejected, (state, action) => {
-      return {
-        ...state,
-        registerStatus: "rejected",
-        registerError: action.payload,
-      };
+      state.loading = false;
+      state.data = [];
+      state.status = "rejected";
+      state.error = action.payload;
     });
-    builder.addCase(loginUser.pending, (state, action) => {
-      return { ...state, loginStatus: "pending" };
+
+
+    builder.addCase(signIn.pending, state => {
+      state.loading = true;
+      state.status = "pending";
     });
-    builder.addCase(loginUser.fulfilled, (state, action) => {
-      if (action.payload) {
-        const user = jwtDecode(action.payload);
-        return {
-          ...state,
-          token: action.payload,
-          name: user.name,
-          email: user.email,
-          _id: user._id,
-          isAdmin: user.isAdmin,
-          loginStatus: "success",
-        };
-      } else return state;
+    builder.addCase(signIn.fulfilled, (state, action) => {
+      state.loading = false;
+      state.data = action.payload;
+      state.status = "success";
+
+      const userToken = jwtDecode(state.data.token);
+      state.user.firstname = userToken.firstname;
+      state.user.lastname = userToken.lastname;
+      state.user.email = userToken.email;
+      state.user.isAdmin = userToken.isAdmin;
+      state.user.image = userToken.image;
     });
-    builder.addCase(loginUser.rejected, (state, action) => {
-      return {
-        ...state,
-        loginStatus: "rejected",
-        loginError: action.payload,
-      };
+    builder.addCase(signIn.rejected, (state, action) => {
+      state.loading = false;
+      state.data = [];
+      state.status = "rejected";
+      state.error = action.payload;
     });
-    builder.addCase(getUser.pending, (state, action) => {
-      return {
-        ...state,
-        getUserStatus: "pending",
-      };
+
+    builder.addCase(signOut.pending, state => {
+      state.loading = true;
+      state.status = "pending";
     });
-    builder.addCase(getUser.fulfilled, (state, action) => {
-      if (action.payload) {
-        const user = jwtDecode(action.payload);
-        return {
-          ...state,
-          token: action.payload,
-          name: user.name,
-          email: user.email,
-          _id: user._id,
-          isAdmin: user.isAdmin,
-          getUserStatus: "success",
-        };
-      } else return state;
+    builder.addCase(signOut.fulfilled, (state, action) => {
+      localStorage.removeItem("token");
+      state.loading = false;
+      state.data = [];
+      state.status = "success";
+      state.user.firstname = "";
+      state.user.lastname = "";
+      state.user.email = "";
+      state.user.isAdmin = "";
+      state.user.image = "";
     });
-    builder.addCase(getUser.rejected, (state, action) => {
-      return {
-        ...state,
-        getUserStatus: "rejected",
-        getUserError: action.payload,
-      };
+    builder.addCase(signOut.rejected, (state, action) => {
+      state.loading = false;
+      localStorage.removeItem("token");
+      state.data = [];
+      state.user.firstname = "";
+      state.user.lastname = "";
+      state.user.email = "";
+      state.user.isAdmin = "";
+      state.user.image = "";
+      state.status = "rejected";
+      state.error = action.payload;
     });
+  },
+
+});
+
+export default authSlice.reducer;
+
+/*export const getCartItems = createAsyncThunk(
+  'cart/getCartItems',
+  async (name, thunkAPI) => {
+    try {
+      // console.log(name);
+      // console.log(thunkAPI);
+      // console.log(thunkAPI.getState());
+      // thunkAPI.dispatch(openModal());
+      const resp = await axios(url);
+
+      return resp.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue('something went wrong');
+    }
+  }
+);
+
+const cartSlice = createSlice({
+  name: 'cart',
+  initialState,
+  reducers: {
+    clearCart: (state) => {
+      state.cartItems = [];
+    },
+    removeItem: (state, action) => {
+      const itemId = action.payload;
+      state.cartItems = state.cartItems.filter((item) => item.id !== itemId);
+    },
+    increase: (state, { payload }) => {
+      const cartItem = state.cartItems.find((item) => item.id === payload.id);
+      cartItem.amount = cartItem.amount + 1;
+    },
+    decrease: (state, { payload }) => {
+      const cartItem = state.cartItems.find((item) => item.id === payload.id);
+      cartItem.amount = cartItem.amount - 1;
+    },
+    calculateTotals: (state) => {
+      let amount = 0;
+      let total = 0;
+      state.cartItems.forEach((item) => {
+        amount += item.amount;
+        total += item.amount * item.price;
+      });
+      state.amount = amount;
+      state.total = total;
+    },
+  },
+  extraReducers: {
+    [getCartItems.pending]: (state) => {
+      state.isLoading = true;
+    },
+    [getCartItems.fulfilled]: (state, action) => {
+      // console.log(action);
+      state.isLoading = false;
+      state.cartItems = action.payload;
+    },
+    [getCartItems.rejected]: (state, action) => {
+      console.log(action);
+      state.isLoading = false;
+    },
   },
 });
 
-export const { loadUser, logoutUser } = authSlice.actions;
+// console.log(cartSlice);
+export const { clearCart, removeItem, increase, decrease, calculateTotals } =
+  cartSlice.actions;
 
-export default authSlice.reducer;
+export default cartSlice.reducer;*/

@@ -11,12 +11,13 @@ const { isValidObjectId } = require('mongoose');
 
 //Add carousel on the database
 module.exports.addCarousel = async (req, res) => {
-    const { title, description, color, image } = req.body;
+    const { title, description, color_bg, image } = req.body;
 
     try {
         const schema = Joi.object({
             title: Joi.string().min(3).max(20).required(),
-            description: Joi.string().min(3).max(50).required(),
+            description: Joi.string().min(3).max(200).required(),
+            color_bg: Joi.string().min(3).max(50).required(),
             image: Joi.string().dataUri()
         });
 
@@ -37,7 +38,7 @@ module.exports.addCarousel = async (req, res) => {
             const newCarousel = new Carousel({
                 title,
                 description,
-                color,
+                color_bg,
                 image: uploadedResponse.secure_url,
                 cloudinary_id: uploadedResponse.public_id,
             });
@@ -75,7 +76,8 @@ module.exports.modifyCarousel = async (req, res) => {
 
         const schema = Joi.object({
             title: Joi.string().min(3).max(20),
-            description: Joi.string().min(3).max(50),
+            description: Joi.string().min(3).max(200),
+            color_bg: Joi.string().min(3).max(50),
             image: Joi.string().dataUri()
         });
 
@@ -110,7 +112,7 @@ module.exports.modifyCarousel = async (req, res) => {
         const data = {
             title: req.body.title || carousel.title,
             description: req.body.description || carousel.description,
-            color: req.body.color || carousel.color,
+            color_bg: req.body.color_bg || carousel.color_bg,
             image: imagepath,
             cloudinary_id: cld_id,
         }

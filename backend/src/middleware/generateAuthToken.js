@@ -10,6 +10,7 @@ const generateAuthToken = (user) => {
       lastname: user.lastname,
       email: user.email,
       isAdmin: user.isAdmin,
+      image: user.image,
     },
     jwtSecretKey,
     //{ expiresIn: maxAge }

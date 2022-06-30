@@ -7,6 +7,7 @@ const express = require('express');
 const app = express();
 ///const morgan = require('morgan');
 const mongoose = require("mongoose");
+const bodyParser = require('body-parser');
 
 // Get all the routes
 const authRoutes = require('./src/routes/AuthRoute');
@@ -24,7 +25,7 @@ app.use(cors());
 app.options("*", cors());
 
 //Middleware
-app.use(express.json());
+app.use(bodyParser.json({ limit: '50mb' }))
 
 const api = process.env.API_URL;
 

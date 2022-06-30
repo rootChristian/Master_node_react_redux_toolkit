@@ -5,6 +5,7 @@ import { setupListeners } from '@reduxjs/toolkit/query';
 import carouselsReducer, { carouselsFetch } from "../features/carouselsSlice";
 import productsReducer, { productsFetch } from "../features/productsSlice";
 import categoriesReducer, { categoriesFetch } from "../features/categoriesSlice";
+import authReducer from "../features/authSlice";
 /////import { categoriesApi } from './CategoriesApi';
 /////import { authApi } from './AuthApi';
 /////import userReducer from "./AuthSlice";
@@ -21,6 +22,7 @@ import {
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 
+
 const persistConfig = {
     key: "root",
     version: 1.2,
@@ -32,6 +34,7 @@ const rootReducer = combineReducers({
     carousels: carouselsReducer,
     products: productsReducer,
     categories: categoriesReducer,
+    auth: authReducer,
     /////cart: cartReducer,
 
     /////[authApi.reducerPath]: authApi.reducer,
