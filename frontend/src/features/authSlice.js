@@ -9,8 +9,9 @@ const initialState = {
     firstname: "",
     lastname: "",
     email: "",
-    isAdmin: false,
-    image: null,
+    role: "",
+    //isAdmin: false,
+    image: "",
   },
   loading: false,
   status: "",
@@ -20,16 +21,9 @@ const initialState = {
 //Generates pending, fulfilled and rejected action types
 export const registerUser = createAsyncThunk(
   "user/register",
-  async (values, { rejectWithValue }) => {
+  async (user, { rejectWithValue }) => {
     try {
-      const token = await axios.post(`${url}/users`, {
-        firstname: values.firstname,
-        lastname: values.lastname,
-        email: values.email,
-        password: values.password,
-        gender: values.gender,
-        image: values.image,
-      });
+      const token = await axios.post(`${url}/users/register`, user);
 
       localStorage.setItem("token", token.data.token);
       return token.data;
@@ -91,7 +85,8 @@ const authSlice = createSlice({
       state.user.firstname = userToken.firstname;
       state.user.lastname = userToken.lastname;
       state.user.email = userToken.email;
-      state.user.isAdmin = userToken.isAdmin;
+      state.user.role = userToken.role;
+      //state.user.isAdmin = userToken.isAdmin;
       state.user.image = userToken.image;
     });
     builder.addCase(registerUser.rejected, (state, action) => {
@@ -115,7 +110,8 @@ const authSlice = createSlice({
       state.user.firstname = userToken.firstname;
       state.user.lastname = userToken.lastname;
       state.user.email = userToken.email;
-      state.user.isAdmin = userToken.isAdmin;
+      state.user.role = userToken.role;
+      //state.user.isAdmin = userToken.isAdmin;
       state.user.image = userToken.image;
     });
     builder.addCase(signIn.rejected, (state, action) => {
@@ -137,7 +133,8 @@ const authSlice = createSlice({
       state.user.firstname = "";
       state.user.lastname = "";
       state.user.email = "";
-      state.user.isAdmin = "";
+      state.user.role = "";
+      //state.user.isAdmin = "";
       state.user.image = "";
     });
     builder.addCase(signOut.rejected, (state, action) => {
@@ -147,7 +144,8 @@ const authSlice = createSlice({
       state.user.firstname = "";
       state.user.lastname = "";
       state.user.email = "";
-      state.user.isAdmin = "";
+      state.user.role = "";
+      //state.user.isAdmin = "";
       state.user.image = "";
       state.status = "rejected";
       state.error = action.payload;
@@ -157,72 +155,3 @@ const authSlice = createSlice({
 });
 
 export default authSlice.reducer;
-
-/*export const getCartItems = createAsyncThunk(
-  'cart/getCartItems',
-  async (name, thunkAPI) => {
-    try {
-      // console.log(name);
-      // console.log(thunkAPI);
-      // console.log(thunkAPI.getState());
-      // thunkAPI.dispatch(openModal());
-      const resp = await axios(url);
-
-      return resp.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue('something went wrong');
-    }
-  }
-);
-
-const cartSlice = createSlice({
-  name: 'cart',
-  initialState,
-  reducers: {
-    clearCart: (state) => {
-      state.cartItems = [];
-    },
-    removeItem: (state, action) => {
-      const itemId = action.payload;
-      state.cartItems = state.cartItems.filter((item) => item.id !== itemId);
-    },
-    increase: (state, { payload }) => {
-      const cartItem = state.cartItems.find((item) => item.id === payload.id);
-      cartItem.amount = cartItem.amount + 1;
-    },
-    decrease: (state, { payload }) => {
-      const cartItem = state.cartItems.find((item) => item.id === payload.id);
-      cartItem.amount = cartItem.amount - 1;
-    },
-    calculateTotals: (state) => {
-      let amount = 0;
-      let total = 0;
-      state.cartItems.forEach((item) => {
-        amount += item.amount;
-        total += item.amount * item.price;
-      });
-      state.amount = amount;
-      state.total = total;
-    },
-  },
-  extraReducers: {
-    [getCartItems.pending]: (state) => {
-      state.isLoading = true;
-    },
-    [getCartItems.fulfilled]: (state, action) => {
-      // console.log(action);
-      state.isLoading = false;
-      state.cartItems = action.payload;
-    },
-    [getCartItems.rejected]: (state, action) => {
-      console.log(action);
-      state.isLoading = false;
-    },
-  },
-});
-
-// console.log(cartSlice);
-export const { clearCart, removeItem, increase, decrease, calculateTotals } =
-  cartSlice.actions;
-
-export default cartSlice.reducer;*/

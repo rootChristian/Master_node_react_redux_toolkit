@@ -1,6 +1,5 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import Filter from "../components/Filter";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import Newsletter from "../components/Newsletter";
@@ -16,7 +15,7 @@ const Home = () => {
   return (
     <div>
       <Navbar />
-      {auth.isAdmin ? (
+      {auth.user.role === "ADMIN" || auth.user.role === "ROOT" ? (
         <HomeAdmin />
       ) : (
         <>

@@ -32,15 +32,22 @@ const UserSchema = new mongoose.Schema(
             required: true,
         },
         image: {
-            type: String
+            type: String,
         },
         cloudinary_id: {
             type: String,
         },
-        isAdmin: {
+        role: {
+            type: String,
+            minlength: 4,
+            maxlength: 5,
+            enum: ['ROOT', 'ADMIN', 'USER'],
+            default: 'USER'
+        },
+        /*isAdmin: {
             type: Boolean,
             default: false
-        },
+        },*/
     },
     { timestamps: true }
 );

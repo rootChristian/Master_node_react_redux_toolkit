@@ -52,7 +52,7 @@ module.exports.signIn = async (req, res) => {
 //registration user on the database 
 module.exports.signUp = async (req, res) => {
 
-    const { firstname, lastname, email, password, gender, image } = req.body;
+    const { firstname, lastname, email, password, gender, role, image } = req.body;
 
     const patt = '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*:."?]).{6,}$';
 
@@ -71,6 +71,7 @@ module.exports.signUp = async (req, res) => {
                 })
                 .required(),
             gender: Joi.string().required(),
+            role: Joi.string().min(4).max(5).required(),
             image: Joi.string(),
         });
 
@@ -83,37 +84,47 @@ module.exports.signUp = async (req, res) => {
         let user = await User.findOne({ email: req.body.email });
         if (user) return res.status(400).send("User already exist...");
 
-        //when use postman to test
-        //const pathName = req.file.path;
+        if (role !== "USER" &&
+            role !== "ADMIN" &&
+            role !== "ROOT") return res.status(400).send("Wrong role!");
 
-        const uploadedResponse = await cloudinary.uploader.upload(req.body.image, {
-            upload_preset: "dev_users",
+        let imagepath, cld_id, uploadedResponse;
+
+        if (req.body.image || req?.file) {
+            uploadedResponse = await cloudinary.uploader.upload(req.body.image /*req.file.path*/, {
+                upload_preset: "dev_users",
+            });
+            imagepath = uploadedResponse.secure_url;
+            cld_id = uploadedResponse.public_id;
+        } else {
+            imagepath = "https://res.cloudinary.com/dcdkw4ylr/image/upload/v1656672072/logo/gjn19n4yvlex8y0qn1w4.png";
+            cld_id = "logo/gjn19n4yvlex8y0qn1w4";
+        }
+
+        const newUser = new User({
+            firstname,
+            lastname,
+            email,
+            password: CryptoJS.AES.encrypt(
+                password,
+                process.env.SECRET_CRYPTOJS).toString(),
+            gender,
+            role,
+            image: imagepath,
+            cloudinary_id: cld_id,
         });
 
-        if (uploadedResponse) {
-            const newUser = new User({
-                firstname,
-                lastname,
-                email,
-                password: CryptoJS.AES.encrypt(
-                    password,
-                    process.env.SECRET_CRYPTOJS).toString(),
-                gender,
-                image: uploadedResponse.secure_url,
-                cloudinary_id: uploadedResponse.public_id,
-            });
-
-            if (!newUser) {
-                const message = "the user cannot be created!";
-                res.status(400).send({ message });
-                return;
-            }
-
-            const token = generateAuthToken(newUser);
-            await newUser.save();
-            const message = "User create successfully.";
-            res.status(201).json({ message, token });
+        if (!newUser) {
+            const message = "the user cannot be created!";
+            res.status(400).send({ message });
+            return;
         }
+
+        const token = generateAuthToken(newUser);
+        await newUser.save();
+        const message = "User create successfully.";
+        res.status(201).json({ message, token });
+
     } catch (err) {
         res.status(500).json({ message: err });
         console.log(err);

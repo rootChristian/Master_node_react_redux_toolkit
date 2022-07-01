@@ -32,7 +32,7 @@ function App() {
       <ToastContainer />
       <Routes>
         <Route path='/' exact element={<Home />} />
-        {auth.isAdmin ? (
+        {auth.role === "ADMIN" || auth.role === "ROOT" ? (
           <>
 
 

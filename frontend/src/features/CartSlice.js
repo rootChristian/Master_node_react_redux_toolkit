@@ -1,9 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
 const initialState = {
-    data: localStorage.getItem("cartData")
-        ? JSON.parse(localStorage.getItem("cartData"))
-        : [],
+    data: [],
     shipping: 0,
     totalQuantity: 0,
     totalAmount: 0,
@@ -32,15 +30,12 @@ const cartSlice = createSlice({
                     position: "bottom-left",
                 });
             }
-            //state.data.push(action.payload)
-            localStorage.setItem("cartData", JSON.stringify(state.data));
         },
         removeFromCart(state, action) {
             const temp = state.data.filter(
                 item => item._id !== action.payload._id
             )
             state.data = temp;
-            localStorage.setItem("cartData", JSON.stringify(state.data));
             toast.error(`Product ${action.payload.name} at remove from cart...`, {
                 position: "bottom-left",
             });
@@ -63,7 +58,6 @@ const cartSlice = createSlice({
                     position: "bottom-left",
                 });
             }
-            localStorage.setItem("cartData", JSON.stringify(state.data));
         },
         getTotals(state, action) {
             let { globalTotal, total, quantity, shipping } = state.data.reduce(
@@ -104,7 +98,6 @@ const cartSlice = createSlice({
             toast.error(`Cart cleared...`, {
                 position: "bottom-left",
             });
-            localStorage.setItem("cartData", JSON.stringify(state.data));
         }
     },
 });

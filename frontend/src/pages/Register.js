@@ -46,19 +46,20 @@ const Register = () => {
 
   const handleImage = (e) => {
     const file = e.target.files[0];
-    transformFileData(file);
+
+    if (file) transformFileData(file);
+    else setImage('');
   }
 
   const transformFileData = (file) => {
     const reader = new FileReader();
-    if (file && types.includes(file.type)) {
+    if (types.includes(file.type)) {
       reader.readAsDataURL(file);
       reader.onloadend = () => {
         setImage(reader.result);
         setErrorMsg('');
       };
     } else {
-      setImage('');
       setErrorMsg("Please select an image file (png or jpeg or pgp)");
       toast.error("Please select an image file (png or jpeg)", {
         position: "bottom-left",
@@ -70,8 +71,8 @@ const Register = () => {
     e.preventDefault();
 
     if (password === confirmPassword) {
-      const User = registerUser({ firstname, lastname, email, password, gender, image: image });
-      dispatch(User);
+      const User = { firstname, lastname, email, password, gender, image: image };
+      dispatch(registerUser(User));
     } else {
       setErrorMsg("Password don't match!");
       toast.error("Password don't match!", {

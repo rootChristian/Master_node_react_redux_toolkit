@@ -34,7 +34,7 @@ const Navbar = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const auth = useSelector((state) => state.auth);
-    //const { totalQuantity } = useSelector((state) => state.cart);
+    const { totalQuantity } = useSelector((state) => state.cart);
 
     /*useEffect(() => {
         if (auth.status === "success") {
@@ -64,7 +64,7 @@ const Navbar = () => {
                     <Logo src="https://res.cloudinary.com/dcdkw4ylr/image/upload/v1656334924/logo/kzduo2xqybwgkgap0uuj.png" alt='logo' />
                     <LogoH1>Eshop</LogoH1>
                 </Left>
-                {auth.isAdmin ? (
+                {auth.user.role === "ADMIN" || auth.user.role === "ROOT" ? (
                     <H1>ADMIN DASHBOARD</H1>
                 ) : (
                     <Center>
@@ -99,28 +99,26 @@ const Navbar = () => {
                             <MenuItem><NavLinks to="/login">LOGIN</NavLinks></MenuItem>
                         </>
                     )}
-                    {auth.isAdmin ? (
+                    {auth.user.role === "ADMIN" || auth.user.role === "ROOT" ? (
                         <MenuItem>
                             <NotificationsNone />
                         </MenuItem>
                     ) : (
                         <MenuItem>
                             <NavLink to="/cart">
-                                <Badge badgeContent={"0"} color="primary">
+                                {totalQuantity ? <Badge badgeContent={totalQuantity} color="primary">
                                     <ShoppingCartOutlined />
                                 </Badge>
-
+                                    : <Badge badgeContent={"0"} color="primary">
+                                        <ShoppingCartOutlined />
+                                    </Badge>
+                                }
                             </NavLink>
                         </MenuItem>
                     )}
                 </Right>
             </Header>
-            {auth.isAdmin ? (
-                <>
-                </>
-            ) : (
-                <Filter />
-            )}
+            {auth.user.role === "ADMIN" || auth.user.role === "ROOT" ? (<></>) : (<Filter />)}
         </Container>
     );
 };

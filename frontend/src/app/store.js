@@ -1,14 +1,10 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from '@reduxjs/toolkit/query';
-/////import { productsApi } from './ProductsApi';
-/////import cartReducer, { getTotals } from './CartSlice';
+import cartReducer, { getTotals } from '../features/CartSlice';
 import carouselsReducer, { carouselsFetch } from "../features/carouselsSlice";
 import productsReducer, { productsFetch } from "../features/productsSlice";
 import categoriesReducer, { categoriesFetch } from "../features/categoriesSlice";
 import authReducer from "../features/authSlice";
-/////import { categoriesApi } from './CategoriesApi';
-/////import { authApi } from './AuthApi';
-/////import userReducer from "./AuthSlice";
 
 import {
     persistStore,
@@ -35,7 +31,7 @@ const rootReducer = combineReducers({
     products: productsReducer,
     categories: categoriesReducer,
     auth: authReducer,
-    /////cart: cartReducer,
+    cart: cartReducer,
 
     /////[authApi.reducerPath]: authApi.reducer,
     /////[productsApi.reducerPath]: productsApi.reducer,
@@ -46,7 +42,6 @@ const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 export const store = configureStore({
     reducer: persistedReducer,
-    //devTools: process.env.NODE_ENV !== 'production',
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
             serializableCheck: {
@@ -59,7 +54,7 @@ store.dispatch(carouselsFetch());
 store.dispatch(categoriesFetch());
 store.dispatch(productsFetch());
 // Update the total cart item. 
-//store.dispatch(getTotals());
+store.dispatch(getTotals());
 
 // It will enable to refetch the data on certain events, such as refetchOnFocus and refetchOnReconnect.
 setupListeners(store.dispatch)

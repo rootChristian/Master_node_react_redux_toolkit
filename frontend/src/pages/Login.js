@@ -29,7 +29,6 @@ const Login = () => {
       });
       navigate("/");
     }
-
     if (auth.error) {
     toast.error(auth.error, {
       position: "bottom-left",

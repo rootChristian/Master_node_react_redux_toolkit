@@ -6,14 +6,10 @@ import {
   Button,
   Links
 } from "../../styles/stylesComponents/items/StyleCategoryItem";
-import { useState } from "react";
-//import ProductItem from "./items/ProductItem";
 
-import { useDispatch } from "react-redux";
 import { useNavigate } from 'react-router-dom';
 
 const CategoryItem = ({ item }) => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleC = (item) => {
