@@ -6,27 +6,13 @@ import {
   AddContainer, Avatar, ContainerWrapper, Datatable,
   Delete, Edit, Hr, Links, Span, Title, UserContainer, Wrapper
 } from "../styles/stylesAdmin/StyleDataTableProducts";
-
-import { useGetAllProductsQuery } from "../features/ProductsApi";
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useSelector } from "react-redux";
 
 const DataTableProducts = () => {
 
-  const [products, setProducts] = useState([]);
+  const products = useSelector((state) => state.products);
 
-  //## Veille methode utiliser pr resoudre le pb de la dispatch
-  useEffect(() => {
-    const getProducts = async () => {
-      try {
-        const res = await axios.get("http://localhost:8000/api/v1/products");
-        setProducts(res.data);
-      } catch (err) { }
-    };
-    getProducts();
-  }, []);
-
-  const dataRows = products.map((item, index) => (
+  const dataRows = products.items.map((item, index) => (
     {
       _id: index,
       name: item.name,

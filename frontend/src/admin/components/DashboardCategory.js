@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { useSaveCategoryMutation } from '../../features/AuthApi';
+///import { useSaveCategoryMutation } from '../../features/AuthApi';
 import { toast } from "react-toastify";
 import {
     Avatar,
@@ -15,14 +15,6 @@ import {
     Error,
     TitleAvatar,
 } from '../../styles/stylesAdmin/components/StyleDashboardCategory';
-import {
-    getStorage,
-    ref,
-    uploadBytesResumable,
-    getDownloadURL,
-} from "firebase/storage";
-import app from "../../firebase";
-
 
 const DashboardCategory = () => {
     const [name, setName] = useState("");
@@ -32,7 +24,7 @@ const DashboardCategory = () => {
     const [preview, setPreview] = useState(null);
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const [saveCategory, { data, isError, error, isSuccess }] = useSaveCategoryMutation();
+    /*const [saveCategory, { data, isError, error, isSuccess }] = useSaveCategoryMutation();
 
     useEffect(() => {
 
@@ -108,7 +100,7 @@ const DashboardCategory = () => {
             }
         );
     };
-
+*/
     return (
         <Container>
             <Wrapper>
@@ -117,7 +109,7 @@ const DashboardCategory = () => {
             </Wrapper>
             <ContainerTable>
                 <UserContainer>
-                    <Form onSubmit={handleClick}>
+                    <Form /*onSubmit={handleClick}*/>
                         <Input placeholder="name" type="text"
                             onChange={(e) => setName(e.target.value)}
                             required />
@@ -125,7 +117,7 @@ const DashboardCategory = () => {
                             <legend>Image</legend>
                             <label>
                                 <input type="file" maxFileSize={5242880}
-                                    onChange={handleImage}
+                                    //onChange={handleImage}
                                     required />
                             </label>
                         </ContactFieldset>

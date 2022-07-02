@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 
 const initialState = {
     items: [],
+    product: [],
     status: null,
     createStatus: null,
 };
@@ -21,8 +22,21 @@ export const productsFetch = createAsyncThunk(
     }
 );
 
+export const getProduct = createAsyncThunk(
+    "products/getProduct",
+    async (_id, { rejectWithValue }) => {
+        try {
+            const response = await axios.get(`${url}/products/${_id}`);
+            return response.data;
+        } catch (error) {
+            console.log(error.response);
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
 export const productsCreate = createAsyncThunk(
-    "products/productsCreate",
+    "products/productCreate",
     async (values) => {
         try {
             const response = await axios.post(
@@ -43,28 +57,46 @@ const productsSlice = createSlice({
     name: "products",
     initialState,
     reducers: {},
-    extraReducers: {
-        [productsFetch.pending]: (state, action) => {
+    extraReducers: (builder) => {
+        builder.addCase(productsFetch.pending, (state, action) => {
             state.status = "pending";
-        },
-        [productsFetch.fulfilled]: (state, action) => {
+        });
+        builder.addCase(productsFetch.fulfilled, (state, action) => {
             state.items = action.payload;
             state.status = "success";
-        },
-        [productsFetch.rejected]: (state, action) => {
+        });
+        builder.addCase(productsFetch.rejected, (state, action) => {
             state.status = "rejected";
-        },
-        [productsCreate.pending]: (state, action) => {
-            state.createStatus = "pending";
-        },
-        [productsCreate.fulfilled]: (state, action) => {
+        });
+
+
+        builder.addCase(getProduct.pending, (state, action) => {
+            state.status = "pending";
+        });
+        builder.addCase(getProduct.fulfilled, (state, action) => {
+            state.product = action.payload;
+            state.status = "success";
+        });
+        builder.addCase(getProduct.rejected, (state, action) => {
+            state.status = "rejected";
+        });
+
+
+        builder.addCase(productsCreate.pending, (state, action) => {
+            state.loading = true;
+            state.status = "pending";
+        });
+        builder.addCase(productsCreate.fulfilled, (state, action) => {
             state.items.push(action.payload);
+            state.status = "success";
             state.createStatus = "success";
             toast.success("Product Created!");
-        },
-        [productsCreate.rejected]: (state, action) => {
+        });
+        builder.addCase(productsCreate.rejected, (state, action) => {
             state.createStatus = "rejected";
-        },
+            state.status = "rejected";
+        });
+
     },
 });
 

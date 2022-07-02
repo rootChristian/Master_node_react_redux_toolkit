@@ -6,28 +6,13 @@ import {
   AddContainer, Avatar, ContainerWrapper, Datatable,
   Delete, Edit, Hr, Links, Span, Title, UserContainer, Wrapper
 } from "../styles/stylesAdmin/StyleDataTableCategories";
-
-//import { useGetAllCategoriesQuery } from "../features/CategoriesApi";
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useSelector } from "react-redux";
 
 const DataTableCategories = () => {
 
-  //const { data } = useGetAllCategoriesQuery();
-  const [categories, setCategories] = useState([]);
+  const categories = useSelector((state) => state.categories);
 
-  //## Veille methode utiliser pr resoudre le pb de la dispatch
-  useEffect(() => {
-    const getCategories = async () => {
-      try {
-        const res = await axios.get("http://localhost:8000/api/v1/categories");
-        setCategories(res.data);
-      } catch (err) { }
-    };
-    getCategories();
-  }, []);
-
-  const dataRows = categories.map((item, index) => (
+  const dataRows = categories.items.map((item, index) => (
     {
       _id: index,
       name: item.name,

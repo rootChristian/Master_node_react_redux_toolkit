@@ -34,6 +34,19 @@ export const registerUser = createAsyncThunk(
   }
 );
 
+export const getUser = createAsyncThunk(
+  "user/getUser",
+  async (id, { rejectWithValue }) => {
+    try {
+      const users = await axios.get(`${url}/users/${id}`, setHeaders());
+      return users.data;
+    } catch (error) {
+      console.log(error.response);
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
 export const signIn = createAsyncThunk(
   "user/login",
   async (values, { rejectWithValue }) => {
@@ -90,6 +103,23 @@ const authSlice = createSlice({
       state.user.image = userToken.image;
     });
     builder.addCase(registerUser.rejected, (state, action) => {
+      state.loading = false;
+      state.data = [];
+      state.status = "rejected";
+      state.error = action.payload;
+    });
+
+
+    builder.addCase(getUser.pending, (state, action) => {
+      state.loading = true;
+      state.status = "pending";
+    });
+    builder.addCase(getUser.fulfilled, (state, action) => {
+      state.loading = false;
+      state.data = action.payload;
+      state.status = "success";
+    });
+    builder.addCase(getUser.rejected, (state, action) => {
       state.loading = false;
       state.data = [];
       state.status = "rejected";

@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { DataGrid } from "@material-ui/data-grid";
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
@@ -8,31 +7,15 @@ import {
   Delete, Edit, Hr, Links, Span, Title, UserContainer, Wrapper
 } from "../styles/stylesAdmin/StyleDataTableUsers";
 import { useDispatch, useSelector } from "react-redux";
-//import { getUsers } from "../features/ApiAdmin";
-import axios from "axios";
+
 
 const DataTableUsers = () => {
   const dispatch = useDispatch();
-  /*## Problème a resoudre ça me fait la call back chaque seconde quand je reste sur la page list users
-  // problème avec la dispatch
-  getUsers(dispatch);
-  //const { data } = useSelector((state) => state.user);
-  */
 
-  const [users, setUsers] = useState([]);
+  const users = useSelector((state) => state.users);
 
-  //## Veille methode utiliser pr resoudre le pb de la dispatch
-  useEffect(() => {
-    const getUsers = async () => {
-      try {
-        const res = await axios.get("http://localhost:8000/api/v1/users");
-        setUsers(res.data);
-      } catch (err) { }
-    };
-    getUsers();
-  }, []);
 
-  const dataRows = users.map((item, index) => (
+  const dataRows = users.items.map((item, index) => (
     {
       _id: index,
       firstname: item.firstname,

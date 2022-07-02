@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { useRegisterUserMutation } from '../../features/AuthApi';
+///import { useRegisterUserMutation } from '../../features/AuthApi';
 import { toast } from "react-toastify";
 import {
     Avatar,
@@ -15,13 +15,6 @@ import {
     Error,
     TitleAvatar,
 } from '../../styles/stylesAdmin/components/StyleDashboardUser';
-import {
-    getStorage,
-    ref,
-    uploadBytesResumable,
-    getDownloadURL,
-} from "firebase/storage";
-import app from "../../firebase";
 
 
 const DashboardUser = () => {
@@ -37,7 +30,7 @@ const DashboardUser = () => {
     const [preview, setPreview] = useState(null);
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const [registerUser, { data, isError, error, isSuccess }] = useRegisterUserMutation();
+    /*const [registerUser, { data, isError, error, isSuccess }] = useRegisterUserMutation();
 
     useEffect(() => {
 
@@ -57,7 +50,7 @@ const DashboardUser = () => {
         }
 
     }, [data, isError, isSuccess])
-
+*/
     const types = ['image/png', 'image/jpeg'];
 
     const handleImage = (e) => {
@@ -86,12 +79,12 @@ const DashboardUser = () => {
     const handleClick = (e) => {
         e.preventDefault();
         const fileName = new Date().getTime() + file.name;
-        const storage = getStorage(app);
-        const storageRef = ref(storage, fileName);
-        const uploadTask = uploadBytesResumable(storageRef, file);
+        //const storage = getStorage(app);
+        //const storageRef = ref(storage, fileName);
+        //const uploadTask = uploadBytesResumable(storageRef, file);
 
         if (password === confirmPassword) {
-            uploadTask.on(
+            /*uploadTask.on(
                 "state_changed",
                 (snapshot) => {
                     const progress =
@@ -109,10 +102,9 @@ const DashboardUser = () => {
                     getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
                         setErrorMsg('');
                         const register = registerUser({ firstname, lastname, email, password, gender, image: downloadURL });
-                        dispatch(register);
-                    });
+                        
                 }
-            );
+            );*/
 
         } else {
             setErrorMsg("Password don't match!");

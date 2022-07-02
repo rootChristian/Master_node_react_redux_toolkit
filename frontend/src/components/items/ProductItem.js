@@ -13,8 +13,8 @@ import {
   Circle,
   Icon,
 } from "../../styles/stylesComponents/items/StyleProductItem";
-import { addToCart } from "../../features/CartSlice";
-//import { singleProduct } from "../../features/ProductSlice";
+import { addToCart } from "../../features/cartSlice";
+import { getProduct } from "../../features/productsSlice";
 
 
 const Product = ({ item }) => {
@@ -27,7 +27,7 @@ const Product = ({ item }) => {
   }
 
   const handleDetailProduct = (item) => {
-    //dispatch(singleProduct(item));
+    dispatch(getProduct(item._id));
     navigate(`/products/${item.name}`);
   }
 

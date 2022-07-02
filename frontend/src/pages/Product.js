@@ -29,21 +29,19 @@ import {
   DetailSizeOption,
   DetailItemWrapper,
 } from "../styles/stylesPages/StyleProduct";
-
 import { useState } from "react";
-
 import { useDispatch, useSelector } from "react-redux";
-import { addToCart } from "../features/CartSlice";
-
+import { addToCart } from "../features/cartSlice";
 
 const Product = (item) => {
   const dispatch = useDispatch();
   let navigate = useNavigate();
-  //const cart = useSelector((state) => state.cart);
-  const productItem = useSelector((state) => state.products);
 
-  const [size, setSize] = useState("");
-  const [color, setColor] = useState("");
+  const { product, status } = useSelector((state) => state.products);
+  const { name, description, price, quantity, image, size, color } = product;
+
+  const [siz, setSiz] = useState("");
+  const [col, setCol] = useState("");
 
   const handleAddToCart = (product) => {
     dispatch(addToCart(product));
@@ -61,63 +59,59 @@ const Product = (item) => {
           </Top>
         </HeaderContainer>
 
-        {productItem.items.length === 0 ? (
+        {status !== "success" ? (
           <BodyContainer>
             <ContainerText>
               <Text>UNSELECTED PRODUCT TO VIEW DETAILS...</Text>
             </ContainerText>
           </BodyContainer>
         ) : (
-          <>
-            {productItem.items.map((product) => (
-              <BodyContainer>
-                <ImgContainer>
-                  <Image src={product.image} />
-                </ImgContainer>
-                <DetailItems>
-                  <Detail>
-                    <DetailTitle>DETAIL</DetailTitle>
-                    <hr />
-                    <DetailItem type="total">
-                      <DetailItemText>Name: </DetailItemText>
-                      <DetailItemText>{product.name}</DetailItemText>
-                    </DetailItem>
-                    <DetailItem type="total">
-                      <DetailItemText>Description: </DetailItemText>
-                      <DetailItemWrapper>
-                        <DetailItemText>{product.description}</DetailItemText>
-                      </DetailItemWrapper>
-                    </DetailItem>
-                    <DetailItem type="total">
-                      <DetailItemText>Price: </DetailItemText>
-                      <DetailItemPrice>€ {product.price}</DetailItemPrice>
-                    </DetailItem>
-                    <DetailItem type="total">
-                      <DetailItemText>Quantity available: </DetailItemText>
-                      <DetailItemQuantity>{product.quantity}</DetailItemQuantity>
-                    </DetailItem>
-                    <DetailItem type="total">
-                      <DetailItemText>Size: </DetailItemText>
-                      <DetailSize onChange={(e) => setSize(e.target.value)}>
-                        {product.size?.map((s) => (
-                          <DetailSizeOption key={s}>{s}</DetailSizeOption>
-                        ))}
-                      </DetailSize>
-                    </DetailItem>
-                    <DetailItem type="total">
-                      <DetailItemText>Color available: </DetailItemText>
-                      <DetailItemColor>
-                        {product.color?.map((c) => (
-                          <DetailColor color={c} key={c} onClick={() => setColor(c)} />
-                        ))}
-                      </DetailItemColor>
-                    </DetailItem>
-                    <Button onClick={() => handleAddToCart(product)}>ADD TO CART</Button>
-                  </Detail>
-                </DetailItems>
-              </BodyContainer>
-            ))}
-          </>
+          <BodyContainer>
+            <ImgContainer>
+              <Image src={image} />
+            </ImgContainer>
+            <DetailItems>
+              <Detail>
+                <DetailTitle>DETAIL</DetailTitle>
+                <hr />
+                <DetailItem type="total">
+                  <DetailItemText>Name: </DetailItemText>
+                  <DetailItemText>{name}</DetailItemText>
+                </DetailItem>
+                <DetailItem type="total">
+                  <DetailItemText>Description: </DetailItemText>
+                  <DetailItemWrapper>
+                    <DetailItemText>{description}</DetailItemText>
+                  </DetailItemWrapper>
+                </DetailItem>
+                <DetailItem type="total">
+                  <DetailItemText>Price: </DetailItemText>
+                  <DetailItemPrice>€ {price}</DetailItemPrice>
+                </DetailItem>
+                <DetailItem type="total">
+                  <DetailItemText>Quantity available: </DetailItemText>
+                  <DetailItemQuantity>{quantity}</DetailItemQuantity>
+                </DetailItem>
+                <DetailItem type="total">
+                  <DetailItemText>Size: </DetailItemText>
+                  <DetailSize onChange={(e) => setSiz(e.target.value)}>
+                    {size?.map((s) => (
+                      <DetailSizeOption key={s}>{s}</DetailSizeOption>
+                    ))}
+                  </DetailSize>
+                </DetailItem>
+                <DetailItem type="total">
+                  <DetailItemText>Color available: </DetailItemText>
+                  <DetailItemColor>
+                    {color?.map((c) => (
+                      <DetailColor col={c} key={c} onClick={() => setCol(c)} />
+                    ))}
+                  </DetailItemColor>
+                </DetailItem>
+                <Button onClick={() => handleAddToCart(product)}>ADD TO CART</Button>
+              </Detail>
+            </DetailItems>
+          </BodyContainer>
         )}
       </Wrapper>
       <Newsletter />

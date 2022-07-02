@@ -1,6 +1,6 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from '@reduxjs/toolkit/query';
-import cartReducer, { getTotals } from '../features/CartSlice';
+import cartReducer, { getTotals } from '../features/cartSlice';
 import carouselsReducer, { carouselsFetch } from "../features/carouselsSlice";
 import productsReducer, { productsFetch } from "../features/productsSlice";
 import categoriesReducer, { categoriesFetch } from "../features/categoriesSlice";

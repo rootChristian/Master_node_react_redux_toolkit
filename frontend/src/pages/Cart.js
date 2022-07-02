@@ -35,7 +35,7 @@ import {
 } from "../styles/stylesPages/StyleCart";
 import Newsletter from "../components/Newsletter";
 import { useSelector, useDispatch } from "react-redux";
-import { addToCart, clearCart, decreaseCart, getTotals, removeFromCart } from "../features/CartSlice";
+import { addToCart, clearCart, decreaseCart, getTotals, removeFromCart } from "../features/cartSlice";
 import { useEffect } from "react";
 
 const Cart = () => {

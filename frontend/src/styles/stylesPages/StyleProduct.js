@@ -50,7 +50,6 @@ export const Top = styled.div`
   justify-content: space-between;
   padding: 20px;
   margin-left: 1.5%;
-  
 `;
 
 export const TopButton = styled(Link)`
@@ -73,18 +72,19 @@ export const DetailItems = styled.div`
 
 export const ImgContainer = styled.div`
   flex: 1;
+  height: 68vh;
 `;
 
 export const Image = styled.img`
   width: 100%;
-  height: 90vh;
+  height: 68vh;
   object-fit: cover;
 `;
 
 export const Detail = styled.div`
   flex: 1;
   text-align: center;
-  background-color: whitesmoke;
+  //background-color: whitesmoke;
   color: #2f2360;
   padding: 50px;
   height: 68vh;
@@ -95,7 +95,7 @@ export const DetailTitle = styled.h1`
 `;
 
 export const DetailItem = styled.div`
-  margin-top: 5px;
+  //margin-top: 5px;
   display: flex;
   justify-content: space-between;
   align-items: center;
