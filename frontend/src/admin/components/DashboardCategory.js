@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { toast } from "react-toastify";
 import { registerCategory } from '../../features/categoriesSlice';
 import {
@@ -16,6 +16,8 @@ import {
 } from '../../styles/stylesAdmin/components/StyleDashboardCategory';
 
 const DashboardCategory = () => {
+
+    const { user } = useSelector((state) => state.auth);
 
     const [name, setName] = useState("");
     const [errorMsg, setErrorMsg] = useState("");
@@ -84,7 +86,7 @@ const DashboardCategory = () => {
                         </ContactFieldset>
                         <WrapperBottom>
                             {errorMsg && <Error>{errorMsg}</Error>}
-                            <Button type="submit" > CREATE</Button >
+                            <Button type="submit" disabled={user.role !== "ROOT"}> CREATE</Button >
                         </WrapperBottom>
                     </Form >
                 </UserContainer>

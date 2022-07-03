@@ -117,7 +117,7 @@ export const DetailColor = styled.div`
   margin-right: 5%;
   //margin: 0px 5px;
   cursor: pointer;
-  background-color: ${(props) => props.color};
+  background-color: ${(props) => props.col};
 `;
 
 export const DetailItemWrapper = styled.span`

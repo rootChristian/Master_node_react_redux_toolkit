@@ -6,12 +6,12 @@ import {
   AddContainer, Avatar, ContainerWrapper, Datatable,
   Delete, Edit, Hr, Links, Span, Title, UserContainer, Wrapper
 } from "../styles/stylesAdmin/StyleDataTableUsers";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
 
 const DataTableUsers = () => {
-  const dispatch = useDispatch();
 
+  const { user } = useSelector((state) => state.auth);
   const users = useSelector((state) => state.users);
 
   /*const dataRows = users.items.map((item, index) => (
@@ -76,11 +76,11 @@ const DataTableUsers = () => {
           <UserContainer>
             <Edit>
               <Links to={"/#admin/users/" + params.row.id}>
-                <EditOutlinedIcon />
+                <EditOutlinedIcon disabled={user.role !== "ROOT"} />
               </Links>
             </Edit>
             <Delete>
-              <DeleteOutlinedIcon
+              <DeleteOutlinedIcon disabled={user.role !== "ROOT"}
                 onClick={() => handleDelete(params.row.id)}
               />
             </Delete>

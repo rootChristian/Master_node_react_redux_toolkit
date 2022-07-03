@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { toast } from "react-toastify";
 import {
     Avatar,
@@ -18,6 +18,8 @@ import {
 import { registerUser } from "../../features/usersSlice";
 
 const DashboardUser = () => {
+
+    const { user } = useSelector((state) => state.auth);
 
     const [firstname, setFirstName] = useState("");
     const [lastname, setLastName] = useState("");
@@ -128,7 +130,7 @@ const DashboardUser = () => {
                         </ContactFieldset>
                         <WrapperBottom>
                             {errorMsg && <Error>{errorMsg}</Error>}
-                            <Button type="submit" > CREATE</Button >
+                            <Button type="submit" disabled={user.role !== "ROOT"}> CREATE </Button >
                         </WrapperBottom>
                     </Form >
                 </UserContainer>

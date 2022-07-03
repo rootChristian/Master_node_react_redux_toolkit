@@ -17,6 +17,7 @@ import {
 
 const DashboardProduct = () => {
 
+    const { user } = useSelector((state) => state.auth);
     const categories = useSelector((state) => state.categories);
 
     const listSize = ["S", "M", "L", "XL"];
@@ -169,7 +170,7 @@ const DashboardProduct = () => {
                         </ContactFieldset>
                         <WrapperBottom>
                             {errorMsg && <Error>{errorMsg}</Error>}
-                            <Button type="submit" > CREATE</Button >
+                            <Button type="submit" disabled={user.role !== "ROOT"}> CREATE</Button >
                         </WrapperBottom>
                     </Form >
                 </UserContainer>

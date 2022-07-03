@@ -10,6 +10,7 @@ import { useSelector } from "react-redux";
 
 const DataTableProducts = () => {
 
+  const { user } = useSelector((state) => state.auth);
   const products = useSelector((state) => state.products);
 
   /*const dataRows = products.items.map((item, index) => (
@@ -56,11 +57,11 @@ const DataTableProducts = () => {
           <UserContainer>
             <Edit>
               <Links to={"/#admin/products/" + params.row.id}>
-                <EditOutlinedIcon />
+                <EditOutlinedIcon disabled={user.role !== "ROOT"} />
               </Links>
             </Edit>
             <Delete>
-              <DeleteOutlinedIcon
+              <DeleteOutlinedIcon disabled={user.role !== "ROOT"}
                 onClick={() => handleDelete(params.row.id)}
               />
             </Delete>
