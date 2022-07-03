@@ -20,6 +20,7 @@ import {
 } from "../styles/stylesPages/StyleRegister";
 
 const Register = () => {
+
   const [firstname, setFirstName] = useState("");
   const [lastname, setLastName] = useState("");
   const [gender, setGender] = useState("");
@@ -111,7 +112,7 @@ const Register = () => {
             <ImagePreview>
               {image ? (
                 <>
-                  <img src={image} alt="avatar" />
+                  <img src={image} alt="" />
                 </>
               ) : (<></>)}
             </ImagePreview>

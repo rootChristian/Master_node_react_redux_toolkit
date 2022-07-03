@@ -11,9 +11,9 @@ const cloudinary = require("../middleware/cloudinary");
 const Joi = require("joi");
 
 //registration user on the database 
-module.exports.signUp = async (req, res) => {
+module.exports.createUser = async (req, res) => {
 
-    const { firstname, lastname, email, password, gender, image } = req.body;
+    const { firstname, lastname, email, password, gender, role, image } = req.body;
 
     const patt = '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*:."?]).{6,}$';
 
@@ -32,6 +32,7 @@ module.exports.signUp = async (req, res) => {
                 })
                 .required(),
             gender: Joi.string().required(),
+            role: Joi.string().min(4).max(5).required(),
             image: Joi.string(),
         });
 
@@ -43,6 +44,10 @@ module.exports.signUp = async (req, res) => {
 
         let user = await User.findOne({ email: req.body.email });
         if (user) return res.status(400).send("User already exist...");
+
+        if (role !== "USER" &&
+            role !== "ADMIN" &&
+            role !== "ROOT") return res.status(400).send("Wrong role!");
 
         let imagepath, cld_id, uploadedResponse;
 
@@ -65,6 +70,7 @@ module.exports.signUp = async (req, res) => {
                 password,
                 process.env.SECRET_CRYPTOJS).toString(),
             gender,
+            role,
             image: imagepath,
             cloudinary_id: cld_id,
         });
@@ -75,10 +81,10 @@ module.exports.signUp = async (req, res) => {
             return;
         }
 
-        const token = generateAuthToken(newUser);
+        //const token = generateAuthToken(newUser);
         await newUser.save();
         const message = "User create successfully.";
-        res.status(201).json({ message, token });
+        res.status(201).json({ message });
 
     } catch (err) {
         res.status(500).json({ message: err });

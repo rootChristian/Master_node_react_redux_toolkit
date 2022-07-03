@@ -12,7 +12,7 @@ import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 const TableList = () => {
 
   const rows = [
-    {
+    /*{
       id: 1143155,
       product: "Acer Nitro 5",
       img: "https://m.media-amazon.com/images/I/81bc8mA3nKL._AC_UY327_FMwebp_QL65_.jpg",
@@ -31,7 +31,7 @@ const TableList = () => {
       amount: 900,
       method: "Online Payment",
       status: "Pending",
-    },
+    },*/
   ];
 
   return (

@@ -14,10 +14,21 @@ const DataTableUsers = () => {
 
   const users = useSelector((state) => state.users);
 
-
-  const dataRows = users.items.map((item, index) => (
+  /*const dataRows = users.items.map((item, index) => (
     {
       _id: index,
+      firstname: item.firstname,
+      lastname: item.lastname,
+      image: item.image,
+      email: item.email,
+      gender: item.gender,
+      role: item.role,
+    }
+  ));*/
+
+  const dataRows = users.items.map(item => (
+    {
+      _id: item._id,
       firstname: item.firstname,
       lastname: item.lastname,
       image: item.image,
@@ -29,7 +40,7 @@ const DataTableUsers = () => {
 
   const columns = [
     {
-      field: "_id", headerName: "ID", type: "string", width: 120,
+      field: "_id", headerName: "ID", type: "string", width: 200,
     },
     {
       field: "user",
@@ -50,7 +61,11 @@ const DataTableUsers = () => {
     },
     {
       field: "gender", headerName:
-        "Gender", width: 120
+        "Gender", width: 125
+    },
+    {
+      field: "role", headerName:
+        "Role", width: 120
     },
     {
       field: "action",

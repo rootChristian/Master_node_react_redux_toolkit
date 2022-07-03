@@ -9,7 +9,7 @@ const config = process.env;
 
 //Check and verify token
 module.exports.verifyToken = async (req, res, next) => {
-    const token = req.body.token || req.query.token || req.headers["x-access-token"];
+    const token = req.headers["x-access-token"]; /*|| req.body.token || req.query.token ;*/
 
     if (!token)
         return res.status(403).send("Access denied. Not authenticated...");
@@ -25,19 +25,19 @@ module.exports.verifyToken = async (req, res, next) => {
 // Authorized user or administrator
 module.exports.verifyTokenAndAuthorized = async (req, res, next) => {
     await this.verifyToken(req, res, () => {
-        if (req.user._id === req.params.id || req.user.isAdmin)
+        if (req.user._id === req.params.id || req.user.role === "ROOT" || req.user.role === "ADMIN")
             return next();
         else
-            return res.status(403).json("Access denied. Not authorized...");
+            return res.status(403).json("Access denied. Not authorized!");
     })
 };
 
 // Authorized administrator
 module.exports.verifyTokenAndAuthorizedAdmin = async (req, res, next) => {
     await this.verifyToken(req, res, () => {
-        if (req.user.isAdmin)
+        if (req.user.role === "ROOT" || req.user.role === "ADMIN")
             return next();
         else
-            return res.status(403).json("Access denied. Not authorized...");
+            return res.status(403).json("Access denied. Not authorized!!!");
     })
 };

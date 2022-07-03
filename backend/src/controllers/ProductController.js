@@ -22,7 +22,9 @@ module.exports.addProduct = async (req, res) => {
             price: Joi.number().min(1).max(1000).required(),
             image: Joi.string().dataUri(),
             category: Joi.string().required(),
-            size: Joi.string(),
+            size: Joi.array().items(Joi.string()),
+            color: Joi.array().items(Joi.string()),
+            inStock: Joi.boolean(),
         });
 
         const { error } = schema.validate(req.body);
@@ -37,9 +39,9 @@ module.exports.addProduct = async (req, res) => {
         const existCategory = await Category.findById(category)
         if (!existCategory) return res.status(400).json({ errorMessage: "Category not found!", });
 
-        const pathName = req.file.path;
+        //const pathName = req.file.path;
 
-        const uploadedResponse = await cloudinary.uploader.upload(pathName, {
+        const uploadedResponse = await cloudinary.uploader.upload(req.body.image, {
             upload_preset: "dev_products",
         });
 
@@ -137,7 +139,9 @@ module.exports.modifyProduct = async (req, res) => {
             price: Joi.number().min(1).max(1000),
             image: Joi.string().dataUri(),
             category: Joi.string(),
-            size: Joi.string(),
+            size: Joi.array().items(Joi.string()),
+            color: Joi.array().items(Joi.string()),
+            inStock: Joi.boolean(),
         });
 
         const { error } = schema.validate(req.body);
@@ -158,7 +162,7 @@ module.exports.modifyProduct = async (req, res) => {
         } else {
             await cloudinary.uploader.destroy(product.cloudinary_id);
 
-            const uploadedResponse = await cloudinary.uploader.upload(req.file.path, {
+            const uploadedResponse = await cloudinary.uploader.upload(req.body.image, {
                 upload_preset: "dev_products",
             });
 

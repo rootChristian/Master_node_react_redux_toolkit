@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import jwtDecode from "jwt-decode";
-import axios from "axios";
-import { url, setHeaders } from "./api";
+import { publicAxios } from "./api";
 
 const initialState = {
   data: [],
@@ -20,10 +19,10 @@ const initialState = {
 
 //Generates pending, fulfilled and rejected action types
 export const registerUser = createAsyncThunk(
-  "user/register",
+  "auth/register",
   async (user, { rejectWithValue }) => {
     try {
-      const token = await axios.post(`${url}/users/register`, user);
+      const token = await publicAxios.post(`/auth/register`, user);
 
       localStorage.setItem("token", token.data.token);
       return token.data;
@@ -34,24 +33,11 @@ export const registerUser = createAsyncThunk(
   }
 );
 
-export const getUser = createAsyncThunk(
-  "user/getUser",
-  async (id, { rejectWithValue }) => {
-    try {
-      const users = await axios.get(`${url}/users/${id}`, setHeaders());
-      return users.data;
-    } catch (error) {
-      console.log(error.response);
-      return rejectWithValue(error.response.data);
-    }
-  }
-);
-
 export const signIn = createAsyncThunk(
-  "user/login",
+  "auth/login",
   async (values, { rejectWithValue }) => {
     try {
-      const token = await axios.post(`${url}/auth/login`, {
+      const token = await publicAxios.post(`/auth/login`, {
         email: values.email,
         password: values.password,
       });
@@ -66,10 +52,10 @@ export const signIn = createAsyncThunk(
 );
 
 export const signOut = createAsyncThunk(
-  "user/logout",
+  "auth/logout",
   async ({ rejectWithValue }) => {
     try {
-      const response = await axios.post(`${url}/auth/logout`);
+      const response = await publicAxios.post(`/auth/logout`);
       localStorage.removeItem("token");
       return response.data;
     } catch (error) {
@@ -103,23 +89,6 @@ const authSlice = createSlice({
       state.user.image = userToken.image;
     });
     builder.addCase(registerUser.rejected, (state, action) => {
-      state.loading = false;
-      state.data = [];
-      state.status = "rejected";
-      state.error = action.payload;
-    });
-
-
-    builder.addCase(getUser.pending, (state, action) => {
-      state.loading = true;
-      state.status = "pending";
-    });
-    builder.addCase(getUser.fulfilled, (state, action) => {
-      state.loading = false;
-      state.data = action.payload;
-      state.status = "success";
-    });
-    builder.addCase(getUser.rejected, (state, action) => {
       state.loading = false;
       state.data = [];
       state.status = "rejected";

@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-///import { useSaveCategoryMutation } from '../../features/AuthApi';
 import { toast } from "react-toastify";
+import { registerCategory } from '../../features/categoriesSlice';
 import {
     Avatar,
     Container, ContainerTable,
@@ -17,90 +16,52 @@ import {
 } from '../../styles/stylesAdmin/components/StyleDashboardCategory';
 
 const DashboardCategory = () => {
+
     const [name, setName] = useState("");
     const [errorMsg, setErrorMsg] = useState("");
     const [image, setImage] = useState("");
-    const [file, setFile] = useState(null);
-    const [preview, setPreview] = useState(null);
-    const navigate = useNavigate();
     const dispatch = useDispatch();
-    /*const [saveCategory, { data, isError, error, isSuccess }] = useSaveCategoryMutation();
 
-    useEffect(() => {
 
-        if (isError) {
-            setErrorMsg(error.data.message);
-            toast.error(error.data.message, {
-                position: "bottom-left",
-            });
-        }
-
-        if (isSuccess) {
-            setErrorMsg('');
-            toast.success(data.message, {
-                position: "bottom-left",
-            });
-            navigate("/admin/categories");
-        }
-
-    }, [data, isError, isSuccess])
-
-    const types = ['image/png', 'image/jpeg'];
+    const types = ['image/png', 'image/jpeg', 'image/jpg'];
 
     const handleImage = (e) => {
-        let itemFile = e.target.files[0];
+        const file = e.target.files[0];
 
-        if (itemFile && types.includes(itemFile.type)) {
-            setFile(itemFile);
-            setErrorMsg('');
+        if (file) transformFileData(file);
+        else setImage('');
+    }
 
-            //Show image first
-            const fileReader = new FileReader();
-            fileReader.onload = () => {
-                setPreview(fileReader.result);
+    const transformFileData = (file) => {
+        const reader = new FileReader();
+        if (types.includes(file.type)) {
+            reader.readAsDataURL(file);
+            reader.onloadend = () => {
+                setImage(reader.result);
+                setErrorMsg('');
             };
-            fileReader.readAsDataURL(itemFile);
-
         } else {
-            setFile(null); setPreview(null);
-            setErrorMsg("Please select an image file (png or jpeg)");
-            toast.error("Please select an image file (png or jpeg)", {
+            setErrorMsg("Please select an image file (png or jpeg or pgp)");
+            toast.error("Please select an image file (png or jpeg or pgp)", {
                 position: "bottom-left",
             });
         }
-    }
+    };
 
     const handleClick = (e) => {
         e.preventDefault();
-        const fileName = new Date().getTime() + file.name;
-        const storage = getStorage(app);
-        const storageRef = ref(storage, fileName);
-        const uploadTask = uploadBytesResumable(storageRef, file);
 
-        uploadTask.on(
-            "state_changed",
-            (snapshot) => {
-                const progress =
-                    (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                if (progress) {
-                    toast.info("Upload is " + progress + "% done", {
-                        position: "bottom-left",
-                    });
-                }
-            },
-            (error) => {
-                setErrorMsg('Handle unsuccessful uploads');
-            },
-            () => {
-                getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-                    setErrorMsg('');
-                    const save = saveCategory({ name, image: downloadURL });
-                    dispatch(save);
-                });
-            }
-        );
+        if (name && image) {
+            const category = { name, image: image };
+            dispatch(registerCategory(category));
+        } else {
+            setErrorMsg("Insert name or image!");
+            toast.error("Insert name or image!", {
+                position: "bottom-left",
+            });
+        }
     };
-*/
+
     return (
         <Container>
             <Wrapper>
@@ -109,15 +70,15 @@ const DashboardCategory = () => {
             </Wrapper>
             <ContainerTable>
                 <UserContainer>
-                    <Form /*onSubmit={handleClick}*/>
+                    <Form onSubmit={handleClick}>
                         <Input placeholder="name" type="text"
                             onChange={(e) => setName(e.target.value)}
                             required />
                         <ContactFieldset>
                             <legend>Image</legend>
                             <label>
-                                <input type="file" maxFileSize={5242880}
-                                    //onChange={handleImage}
+                                <input name="image" type="file"
+                                    onChange={handleImage}
                                     required />
                             </label>
                         </ContactFieldset>
@@ -129,7 +90,9 @@ const DashboardCategory = () => {
                 </UserContainer>
                 <UserContainer>
                     <TitleAvatar>Category image</TitleAvatar>
-                    <Avatar src={preview} alt='' />
+                    {image ? (
+                        <Avatar src={image} alt="" />
+                    ) : (<></>)}
                 </UserContainer>
             </ContainerTable>
         </Container>

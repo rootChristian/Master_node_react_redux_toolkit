@@ -45,13 +45,13 @@ const Footer = () => {
             <FooterLinksItems>
               <FooterLinkTitle>CONTACT US</FooterLinkTitle>
               <ContactItem>
-                <Phone style={{ marginRight: "10px" }} /> +39 523 56 73
+                <Phone style={{ marginRight: "10px" }} /> +39 000 000 00 00
               </ContactItem>
               <ContactItem>
-                <MailOutline style={{ marginRight: "10px" }} /> contact@eshop.com
+                <MailOutline style={{ marginRight: "10px" }} /> contact@chagest.com
               </ContactItem>
               <ContactItem>
-                <Room style={{ marginRight: "10px" }} /> Street fivestong 4, 232638
+                <Room style={{ marginRight: "10px" }} /> Street unknow 3, 43125 PR
               </ContactItem>
               <Payment src="https://res.cloudinary.com/dcdkw4ylr/image/upload/v1656335002/logo/iaq4zuicq9yix3xi9ef4.png" alt='payment-image' />
             </FooterLinksItems>
@@ -85,16 +85,16 @@ const Footer = () => {
             <Title>ESHOP</Title>
           </SocialLogo>
           <WebsiteRights>
-            © Copyright 2022 - All Rights Reserved by Christian KEMGANG 👨🏾‍💻
+            © Copyright 2022 - All Rights Reserved by Christian KEMGANG NGUESSOP 👨🏾‍💻
           </WebsiteRights>
           <SocialIcons>
-            <SocialIconLink href="/#" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+            <SocialIconLink href="#" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
               <AiFillInstagram />
             </SocialIconLink>
-            <SocialIconLink href="/#" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+            <SocialIconLink href="#" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
               <AiFillFacebook />
             </SocialIconLink>
-            <SocialIconLink href="/#" target="_blank" rel="noopener noreferrer" aria-label="Youtube">
+            <SocialIconLink href="#" target="_blank" rel="noopener noreferrer" aria-label="Youtube">
               <AiFillYoutube />
             </SocialIconLink>
           </SocialIcons>

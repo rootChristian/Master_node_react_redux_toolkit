@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
-import { url, setHeaders } from "./api";
+import { publicAxios, authAxios } from "./api";
 import { toast } from "react-toastify";
 
 const initialState = {
@@ -14,7 +13,7 @@ export const productsFetch = createAsyncThunk(
     "products/productsFetch",
     async () => {
         try {
-            const response = await axios.get(`${url}/products`);
+            const response = await publicAxios.get(`/products`);
             return response.data;
         } catch (error) {
             console.log(error);
@@ -26,7 +25,7 @@ export const getProduct = createAsyncThunk(
     "products/getProduct",
     async (_id, { rejectWithValue }) => {
         try {
-            const response = await axios.get(`${url}/products/${_id}`);
+            const response = await publicAxios.get(`/products/${_id}`);
             return response.data;
         } catch (error) {
             console.log(error.response);
@@ -35,19 +34,15 @@ export const getProduct = createAsyncThunk(
     }
 );
 
-export const productsCreate = createAsyncThunk(
-    "products/productCreate",
-    async (values) => {
+export const registerProduct = createAsyncThunk(
+    "products/register",
+    async (product) => {
         try {
-            const response = await axios.post(
-                `${url}/products`,
-                values,
-                setHeaders()
-            );
+            const response = await authAxios.post(`/products`, product);
 
             return response.data;
         } catch (error) {
-            console.log(error);
+            console.log(error.response);
             toast.error(error.response?.data);
         }
     }
@@ -82,17 +77,17 @@ const productsSlice = createSlice({
         });
 
 
-        builder.addCase(productsCreate.pending, (state, action) => {
+        builder.addCase(registerProduct.pending, (state, action) => {
             state.loading = true;
             state.status = "pending";
         });
-        builder.addCase(productsCreate.fulfilled, (state, action) => {
+        builder.addCase(registerProduct.fulfilled, (state, action) => {
             state.items.push(action.payload);
             state.status = "success";
             state.createStatus = "success";
             toast.success("Product Created!");
         });
-        builder.addCase(productsCreate.rejected, (state, action) => {
+        builder.addCase(registerProduct.rejected, (state, action) => {
             state.createStatus = "rejected";
             state.status = "rejected";
         });

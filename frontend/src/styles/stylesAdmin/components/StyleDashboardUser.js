@@ -104,7 +104,7 @@ export const Links = styled(Link)`
 
 export const Button = styled.button`
     border: none;
-    margin-top: 5%;
+    margin-top: 2%;
     border-radius: 10px;
     padding: 5px 10px;
     background-color: #00b300;
@@ -116,7 +116,7 @@ export const ContactFieldset = styled.fieldset`
     border: 2px solid #ddd;
     width: 90%;
     border-radius: 5px;
-    padding: 10px;
+    padding: 5px;
     margin: 15px 20px 0 0;
     legend {
         padding: 0 8px;
@@ -129,10 +129,21 @@ export const ContactFieldset = styled.fieldset`
     }
 `;
 
-export const Error = styled.span`
+export const Select = styled.select`
+  padding: 5px;
+  margin-right: 10px;
+
+  @media screen and (max-width: 960px) {
+        font-size: 12px;
+        padding: 1%;
+    }
+`;
+
+export const Option = styled.option``;
+
+export const Error = styled.p`
   color: red;
-  padding: 1%;
-  font-weight: 300px;
-  font-size: x-large;
+  font-size: 15;
+  text-align: center;
 `;
 

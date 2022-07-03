@@ -18,11 +18,11 @@ const orderRoutes = require('./src/routes/OrderRoute');
 const carouselRoutes = require('./src/routes/CarouselRoute');
 const stripeRoutes = require('./src/routes/StripeRoute');
 
-const cors = require("cors");
 require("dotenv/config");
 
+const cors = require("cors");
 app.use(cors());
-app.options("*", cors());
+
 
 //Middleware
 app.use(bodyParser.json({ limit: '50mb' }))

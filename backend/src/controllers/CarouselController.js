@@ -101,7 +101,7 @@ module.exports.modifyCarousel = async (req, res) => {
 
             await cloudinary.uploader.destroy(carousel.cloudinary_id);
 
-            const uploadedResponse = await cloudinary.uploader.upload(req.file.path, {
+            const uploadedResponse = await cloudinary.uploader.upload(req.body.image, {
                 upload_preset: "dev_carousels",
             });
 

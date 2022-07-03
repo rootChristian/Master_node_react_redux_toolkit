@@ -46,10 +46,14 @@ const ProductSchema = new mongoose.Schema(
             required: true
         },
         size: {
-            type: Array
+            type: [String],
+            default: []
+            //type: Array
         },
         color: {
-            type: Array
+            type: [String],
+            default: []
+            //type: Array
         },
         inStock: {
             type: Boolean,

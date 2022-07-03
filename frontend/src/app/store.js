@@ -4,6 +4,7 @@ import cartReducer, { getTotals } from '../features/cartSlice';
 import carouselsReducer, { carouselsFetch } from "../features/carouselsSlice";
 import productsReducer, { productsFetch } from "../features/productsSlice";
 import categoriesReducer, { categoriesFetch } from "../features/categoriesSlice";
+import usersReducer, { usersFetch } from "../features/usersSlice";
 import authReducer from "../features/authSlice";
 
 import {
@@ -26,16 +27,12 @@ const persistConfig = {
 };
 
 const rootReducer = combineReducers({
-    /////user: userReducer,
+    users: usersReducer,
     carousels: carouselsReducer,
     products: productsReducer,
     categories: categoriesReducer,
     auth: authReducer,
     cart: cartReducer,
-
-    /////[authApi.reducerPath]: authApi.reducer,
-    /////[productsApi.reducerPath]: productsApi.reducer,
-    /////[categoriesApi.reducerPath]: categoriesApi.reducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -53,6 +50,7 @@ export const store = configureStore({
 store.dispatch(carouselsFetch());
 store.dispatch(categoriesFetch());
 store.dispatch(productsFetch());
+store.dispatch(usersFetch());
 // Update the total cart item. 
 store.dispatch(getTotals());
 

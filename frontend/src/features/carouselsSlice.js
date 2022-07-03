@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
-import { url, setHeaders } from "./api";
+import { publicAxios, authAxios } from "./api";
 import { toast } from "react-toastify";
 
 const initialState = {
@@ -13,7 +12,7 @@ export const carouselsFetch = createAsyncThunk(
     "carousels/carouselsFetch",
     async () => {
         try {
-            const response = await axios.get(`${url}/carousels`);
+            const response = await publicAxios.get(`/carousels`);
             return response.data;
         } catch (error) {
             console.log(error);
@@ -25,11 +24,7 @@ export const carouselsCreate = createAsyncThunk(
     "carousels/carouselsCreate",
     async (values) => {
         try {
-            const response = await axios.post(
-                `${url}/carousels`,
-                values,
-                setHeaders()
-            );
+            const response = await authAxios.post(`/carousels`, values);
 
             return response.data;
         } catch (error) {

@@ -12,9 +12,17 @@ const DataTableCategories = () => {
 
   const categories = useSelector((state) => state.categories);
 
-  const dataRows = categories.items.map((item, index) => (
+  /*const dataRows = categories.items.map((item, index) => (
     {
       _id: index,
+      name: item.name,
+      image: item.image,
+    }
+  ));*/
+
+  const dataRows = categories.items.map(item => (
+    {
+      _id: item._id,
       name: item.name,
       image: item.image,
     }

@@ -28,9 +28,9 @@ module.exports.addCategory = async (req, res) => {
         const existCategory = await Category.findOne({ name });
         if (existCategory) return res.status(400).json({ errorMessage: "Category already exist!", });
 
-        const pathName = req.file.path;
+        //const pathName = req.file.path;
 
-        const uploadedResponse = await cloudinary.uploader.upload(pathName, {
+        const uploadedResponse = await cloudinary.uploader.upload(req.body.image, {
             upload_preset: "dev_categories",
         });
 
@@ -114,7 +114,7 @@ module.exports.modifyCategory = async (req, res) => {
         } else {
             await cloudinary.uploader.destroy(category.cloudinary_id);
 
-            uploadedResponse = await cloudinary.uploader.upload(req.file.path, {
+            uploadedResponse = await cloudinary.uploader.upload(req.body.image, {
                 upload_preset: "dev_categories",
             });
 

@@ -12,9 +12,17 @@ const DataTableProducts = () => {
 
   const products = useSelector((state) => state.products);
 
-  const dataRows = products.items.map((item, index) => (
+  /*const dataRows = products.items.map((item, index) => (
     {
       _id: index,
+      name: item.name,
+      image: item.image,
+    }
+  ));*/
+
+  const dataRows = products.items.map(item => (
+    {
+      _id: item._id,
       name: item.name,
       image: item.image,
     }

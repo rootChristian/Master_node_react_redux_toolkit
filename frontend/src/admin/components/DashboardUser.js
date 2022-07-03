@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-///import { useRegisterUserMutation } from '../../features/AuthApi';
 import { toast } from "react-toastify";
 import {
     Avatar,
@@ -14,98 +12,56 @@ import {
     Button,
     Error,
     TitleAvatar,
+    Select,
+    Option,
 } from '../../styles/stylesAdmin/components/StyleDashboardUser';
-
+import { registerUser } from "../../features/usersSlice";
 
 const DashboardUser = () => {
+
     const [firstname, setFirstName] = useState("");
     const [lastname, setLastName] = useState("");
     const [gender, setGender] = useState("");
+    const [role, setRole] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [errorMsg, setErrorMsg] = useState("");
     const [image, setImage] = useState("");
-    const [file, setFile] = useState(null);
-    const [preview, setPreview] = useState(null);
-    const navigate = useNavigate();
     const dispatch = useDispatch();
-    /*const [registerUser, { data, isError, error, isSuccess }] = useRegisterUserMutation();
 
-    useEffect(() => {
-
-        if (isError) {
-            setErrorMsg(error.data.message);
-            toast.error(error.data.message, {
-                position: "bottom-left",
-            });
-        }
-
-        if (isSuccess) {
-            setErrorMsg('');
-            toast.success(data.message, {
-                position: "bottom-left",
-            });
-            navigate("/admin/users");
-        }
-
-    }, [data, isError, isSuccess])
-*/
-    const types = ['image/png', 'image/jpeg'];
+    const listRole = ["USER", "ADMIN", "ROOT"];
+    const types = ['image/png', 'image/jpeg', 'image/jpg'];
 
     const handleImage = (e) => {
-        let itemFile = e.target.files[0];
+        const file = e.target.files[0];
 
-        if (itemFile && types.includes(itemFile.type)) {
-            setFile(itemFile);
-            setErrorMsg('');
+        if (file) transformFileData(file);
+        else setImage('');
+    }
 
-            //Show image first
-            const fileReader = new FileReader();
-            fileReader.onload = () => {
-                setPreview(fileReader.result);
+    const transformFileData = (file) => {
+        const reader = new FileReader();
+        if (types.includes(file.type)) {
+            reader.readAsDataURL(file);
+            reader.onloadend = () => {
+                setImage(reader.result);
+                setErrorMsg('');
             };
-            fileReader.readAsDataURL(itemFile);
-
         } else {
-            setFile(null); setPreview(null);
-            setErrorMsg("Please select an image file (png or jpeg)");
-            toast.error("Please select an image file (png or jpeg)", {
+            setErrorMsg("Please select an image file (png or jpeg or pgp)");
+            toast.error("Please select an image file (png or jpeg or pgp)", {
                 position: "bottom-left",
             });
         }
-    }
+    };
 
     const handleClick = (e) => {
         e.preventDefault();
-        const fileName = new Date().getTime() + file.name;
-        //const storage = getStorage(app);
-        //const storageRef = ref(storage, fileName);
-        //const uploadTask = uploadBytesResumable(storageRef, file);
 
         if (password === confirmPassword) {
-            /*uploadTask.on(
-                "state_changed",
-                (snapshot) => {
-                    const progress =
-                        (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    if (progress) {
-                        toast.info("Upload is " + progress + "% done", {
-                            position: "bottom-left",
-                        });
-                    }
-                },
-                (error) => {
-                    setErrorMsg('Handle unsuccessful uploads');
-                },
-                () => {
-                    getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-                        setErrorMsg('');
-                        const register = registerUser({ firstname, lastname, email, password, gender, image: downloadURL });
-                        
-                }
-            );*/
-
+            const user = { firstname, lastname, email, password, gender, role, image: image };
+            dispatch(registerUser(user));
         } else {
             setErrorMsg("Password don't match!");
             toast.error("Password don't match!", {
@@ -141,9 +97,9 @@ const DashboardUser = () => {
                         <ContactFieldset>
                             <legend>Image</legend>
                             <label>
-                                <input type="file" maxFileSize={5242880}
+                                <input name="image" type="file"
                                     onChange={handleImage}
-                                    required />
+                                />
                             </label>
                         </ContactFieldset>
                         <ContactFieldset>
@@ -163,6 +119,13 @@ const DashboardUser = () => {
                                 Male
                             </label>
                         </ContactFieldset>
+                        <ContactFieldset>
+                            <label>Role</label>
+                            <Select name={"role"} value={role} onChange={(e) => setRole(e.target.value)} required>
+                                <Option value=""> Select role </Option>
+                                {listRole?.map(r => (<Option value={r} key={r}> {r} </Option>))}
+                            </Select>
+                        </ContactFieldset>
                         <WrapperBottom>
                             {errorMsg && <Error>{errorMsg}</Error>}
                             <Button type="submit" > CREATE</Button >
@@ -171,7 +134,9 @@ const DashboardUser = () => {
                 </UserContainer>
                 <UserContainer>
                     <TitleAvatar>User avater</TitleAvatar>
-                    <Avatar src={preview} alt='Avatar' />
+                    {image ? (
+                        <Avatar src={image} alt="" />
+                    ) : (<></>)}
                 </UserContainer>
             </ContainerTable>
         </Container>
