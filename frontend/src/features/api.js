@@ -1,9 +1,9 @@
 import axios from "axios";
 
 // Development
-export const url = "http://localhost:8000/api/v1";
+//export const url = "http://localhost:8000/api/v1";
 // Production
-//export const url = "https://chagest-eshop.herokuapp.com/api/v1/";
+export const url = "https://chagest-eshop.herokuapp.com/api/v1/";
 
 const token = localStorage.getItem("token");
 
